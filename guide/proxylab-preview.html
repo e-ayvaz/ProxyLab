@@ -198,6 +198,58 @@
   .diffscreen .dsx{margin-left:auto;cursor:pointer;color:var(--text-muted);font-size:20px;line-height:1;padding:2px 8px;border-radius:5px}
   .diffscreen .dsx:hover{background:rgba(255,255,255,.06);color:var(--text-primary)}
   .diffscreen .dsbody{flex:1;overflow-y:auto;padding:18px}
+  /* Remote — Saved / gruplar (gerçek RemoteMapPanel) */
+  .rgrp{display:flex;align-items:center;gap:8px;padding:7px 12px;font-size:11.5px;font-weight:600;color:var(--text-secondary);cursor:pointer}
+  .rgrp:hover{background:rgba(255,255,255,.03)}
+  .rgrp .rg-c{font-size:9px;color:var(--text-faint);width:10px}
+  .rgrp .rg-n{flex:1}
+  .rgrp .rg-cnt{font-size:10px;color:var(--text-muted);font-family:var(--mono);background:rgba(255,255,255,.06);border-radius:4px;padding:1px 6px}
+  .rgrp .rg-x{color:var(--text-faint);cursor:pointer;font-size:14px;line-height:1}
+  .rgrp .rg-x:hover{color:var(--red-bright)}
+  .rreq{display:flex;align-items:center;gap:8px;padding:7px 12px 7px 24px;cursor:pointer;font-size:11.5px}
+  .rreq:hover{background:rgba(255,255,255,.04)}
+  .rreq:hover .rq-run,.rreq:hover .rq-x{opacity:1}
+  .rreq.sel{background:var(--accent-wash)}
+  .rreq .rq-m{font-family:var(--mono);font-size:11px;font-weight:700;width:46px;flex-shrink:0}
+  .rreq .rq-n{flex:1;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--mono)}
+  .rreq .rq-run{color:var(--green-bright);cursor:pointer;flex-shrink:0;opacity:.6}
+  .rreq .rq-x{color:var(--text-faint);cursor:pointer;flex-shrink:0;font-size:13px;opacity:.6}
+  .rungroup{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-faint);padding:12px 12px 4px}
+  .rdrop{margin:4px 12px;padding:13px 10px;border:1px dashed var(--border-strong);border-radius:8px;text-align:center;font-size:11px;font-style:italic;color:var(--text-faint)}
+  /* Replay — Snapshot karşılaştırma modal (MockComparePanel) */
+  .mcmp-h{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+  .mcmp-h h3{margin:0;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+  .mcmp-pill{font-family:var(--mono);font-size:11px;font-weight:600;border-radius:5px;padding:3px 9px}
+  .mcmp-pill.a{background:var(--red-bg);color:var(--red-bright)}
+  .mcmp-pill.b{background:var(--green-bg);color:var(--green-bright)}
+  .mcmp-stat{font-size:11.5px;color:var(--text-muted)}
+  .mcmp-body{flex:1;display:flex;min-height:0}
+  .mcmp-side{width:300px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;min-height:0}
+  .mcmp-ftabs{display:flex;gap:2px;padding:8px;flex-wrap:wrap;border-bottom:1px solid var(--border)}
+  .mcmp-ftab{font-size:10.5px;padding:5px 9px;border-radius:6px;color:var(--text-muted);cursor:pointer;white-space:nowrap}
+  .mcmp-ftab.on{background:rgba(255,255,255,.06);color:var(--text-primary);font-weight:600}
+  .mcmp-eplist{flex:1;overflow-y:auto;padding:6px}
+  .mcmp-ep{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;cursor:pointer;font-family:var(--mono);font-size:11px}
+  .mcmp-ep:hover{background:var(--bg-tertiary)}
+  .mcmp-ep.sel{background:var(--accent-wash)}
+  .mcmp-ep .ep-p{flex:1;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mcmp-ep .ep-s{font-size:10px;color:var(--text-muted)}
+  .mcmp-detail{flex:1;overflow-y:auto;padding:16px 20px;min-width:0}
+  .mcmp-sect{display:inline-flex;background:var(--bg-input);border-radius:7px;padding:2px;gap:2px;margin-bottom:14px}
+  .mcmp-sect span{font-size:11px;padding:5px 11px;border-radius:5px;color:var(--text-muted);cursor:pointer}
+  .mcmp-sect span.on{background:var(--bg-elevated);color:var(--text-primary);font-weight:600}
+  .statuscard{border:1px solid var(--amber-bg);background:var(--amber-bg);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-family:var(--mono);font-size:12px}
+  .statuscard .lbl{font-family:var(--sans);font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:4px}
+  .difftitle{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--blue-bright);margin:14px 0 8px}
+  .difftitle.res{color:var(--green-bright)}
+  .diffrow{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11.5px}
+  .diffrow .dt{width:14px;font-weight:700;flex-shrink:0}
+  .diffrow .dt.chg{color:var(--amber-bright)}.diffrow .dt.add{color:var(--green-bright)}.diffrow .dt.del{color:var(--red-bright)}
+  .diffrow .dpath{color:var(--cyan-bright);flex:1;min-width:0;word-break:break-all}
+  .diffrow .dvals{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .vchip{border-radius:4px;padding:1px 7px;font-size:11px}
+  .vchip.old{background:var(--red-bg);color:var(--red-bright)}
+  .vchip.new{background:var(--green-bg);color:var(--green-bright)}
 
   /* Body + views */
   .body{flex:1;display:flex;min-height:0;position:relative}
@@ -682,20 +734,14 @@ authorization: Bearer eyJhbGciOi…
 
           <!-- ===== REPLAY VIEW (Mock & Akış) ===== -->
           <div class="view" data-view="replay">
-            <div class="substrip" style="border-top:0">
-              <div class="subtabs" id="replay-subtabs">
-                <div class="subtab active" data-rsub="mocks">Mock Snapshots <span class="cnt">3</span></div>
-                <div class="subtab" data-rsub="compare">Karşılaştır (Diff)</div>
-              </div>
-            </div>
-            <!-- MOCKS PANE -->
             <div class="pane" id="replay-mocks">
               <div class="pside">
-                <div class="pside-head" id="replay-rec"><h3>Snapshot'lar</h3><div style="display:flex;gap:6px"><div class="btn sm" id="snap-import">⬆ İçe Aktar</div><div class="btn green sm">● Kaydet</div></div></div>
+                <div class="pside-head" id="replay-rec"><h3>Mock Snapshots</h3><div style="display:flex;gap:6px"><div class="btn sm" id="snap-import">⬆ İçe Aktar</div><div class="btn sm" id="snap-compare">⇄ Karşılaştır</div><div class="btn green sm">● Kaydet</div></div></div>
                 <div class="pside-list" id="replay-list">
                   <div class="litem lstripe sel"><div class="lt"><b>Login + Feed (offline)</b></div><div class="lsub" style="font-family:var(--sans);color:var(--green-bright)">● Aktif · 6 endpoint · 17.06.2026</div></div>
+                  <div class="litem"><div class="lt"><b>Android — Login Flow</b></div><div class="lsub" style="font-family:var(--sans)">5 endpoint · 16.06.2026</div></div>
+                  <div class="litem"><div class="lt"><b>iOS — Login Flow</b></div><div class="lsub" style="font-family:var(--sans)">4 endpoint · 16.06.2026</div></div>
                   <div class="litem"><div class="lt"><b>Ödeme akışı v2</b></div><div class="lsub" style="font-family:var(--sans)">4 endpoint · 14.06.2026</div></div>
-                  <div class="litem"><div class="lt"><b>Boş sepet senaryosu</b></div><div class="lsub" style="font-family:var(--sans)">2 endpoint · 10.06.2026</div></div>
                 </div>
               </div>
               <div class="pmain" id="replay-main">
@@ -704,60 +750,59 @@ authorization: Bearer eyJhbGciOi…
                 <div class="litem"><div class="lt"><span class="pill g">200</span><span class="method-tag" style="color:var(--green-bright)">POST</span><b style="font-family:var(--mono);font-weight:500">/api/auth/login</b></div></div>
                 <div class="litem"><div class="lt"><span class="pill g">200</span><span class="method-tag" style="color:var(--text-secondary)">GET</span><b style="font-family:var(--mono);font-weight:500">/v1/users/me</b></div></div>
                 <div class="litem"><div class="lt"><span class="pill g">200</span><span class="method-tag" style="color:var(--text-secondary)">GET</span><b style="font-family:var(--mono);font-weight:500">/v1/feed?page=1</b></div></div>
-                <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><div class="btn">Devre Dışı Bırak</div><div class="btn">Karşılaştır</div><div class="btn" id="snap-export">⬇ Dışa Aktar (JSON)</div><div class="btn" id="snap-pdf">📄 PDF İndir</div></div>
-              </div>
-            </div>
-            <!-- 2 SNAPSHOT KARŞILAŞTIRMA PANE -->
-            <div class="pane" id="replay-compare" style="display:none">
-              <div class="pmain" style="padding:18px 22px">
-                <div class="banner info">İki mock snapshot'ı karşılaştır. Örnek: <b>Android</b> ve <b>iOS</b> login akışında <b>dashboard'a gelene kadar</b> çağrılan servislerin request/response farkları — platform tutarsızlıklarını yakalamak için.</div>
-                <div class="cmpsel">
-                  <select class="inp"><option>Ⓐ Android — Login Flow · 5 servis</option><option>Ödeme akışı v2</option></select>
-                  <span style="color:var(--text-muted)">↔</span>
-                  <select class="inp"><option>Ⓑ iOS — Login Flow · 4 servis</option><option>Boş sepet senaryosu</option></select>
-                </div>
-                <div style="font-size:11px;color:var(--text-faint);margin-bottom:6px">DASHBOARD'A KADAR ÇAĞRILAN SERVİSLER</div>
-                <div class="cmplist" id="cmp-list"></div>
-                <div id="cmp-detail"></div>
+                <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><div class="btn">Mock Etkinleştir</div><div class="btn" id="snap-compare2">⇄ Karşılaştır</div><div class="btn" id="snap-export">⬇ JSON Dışa Aktar</div><div class="btn" id="snap-pdf">📄 PDF</div></div>
               </div>
             </div>
           </div>
 
           <!-- ===== REMOTE VIEW (Request Composer) ===== -->
           <div class="view vrow" data-view="remote">
-            <div class="pside" style="width:280px">
-              <div class="pside-head"><h3>Kayıtlı İstekler</h3><div style="display:flex;gap:6px"><div class="btn sm" id="remote-curl-btn">⤓ cURL</div><div class="btn green sm">+ Yeni</div></div></div>
-              <div class="pside-list">
-                <div class="fb-group" style="padding:6px 8px">▾ Auth <span style="color:var(--text-faint);font-weight:400">· 2</span></div>
-                <div class="litem sel"><div class="lt"><span class="method-tag" style="color:var(--green-bright)">POST</span><b>Login</b></div><div class="lsub">/api/auth/login</div></div>
-                <div class="litem"><div class="lt"><span class="method-tag" style="color:var(--text-secondary)">GET</span><b>Profilim</b></div><div class="lsub">/v1/users/me</div></div>
-                <div class="fb-group" style="padding:10px 8px 6px">▾ Sepet <span style="color:var(--text-faint);font-weight:400">· 2</span></div>
-                <div class="litem"><div class="lt"><span class="method-tag" style="color:var(--amber-bright)">PUT</span><b>Ürün ekle</b></div><div class="lsub">/v1/cart/items</div></div>
-                <div class="litem"><div class="lt"><span class="method-tag" style="color:var(--red-bright)">DELETE</span><b>Ürün çıkar</b></div><div class="lsub">/v1/cart/items/:id</div></div>
-                <div class="fb-group" style="padding:10px 8px 6px">▾ Ödeme <span style="color:var(--text-faint);font-weight:400">· 1</span></div>
-                <div class="litem"><div class="lt"><span class="method-tag" style="color:var(--green-bright)">POST</span><b>Checkout</b></div><div class="lsub">/v1/payments/checkout</div></div>
+            <!-- Saved sidebar (gruplar + UNGROUPED) -->
+            <div class="pside" style="width:262px">
+              <div style="padding:10px 12px;border-bottom:1px solid var(--border)"><div class="btn accent" style="width:100%;justify-content:center" id="remote-newmap">+ Remote Map</div></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px 4px">
+                <span style="font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-faint)">SAVED · 5</span>
+                <div class="btn sm" id="remote-group">+ Group</div>
+              </div>
+              <div class="pside-list" style="padding-top:0">
+                <div class="rgrp"><span class="rg-c">▾</span><span class="rg-n">Auth</span><span class="rg-cnt">2</span><span class="rg-x">×</span></div>
+                <div class="rreq sel"><span class="rq-m" style="color:var(--green-bright)">POST</span><span class="rq-n">Login</span><span class="rq-run">▶</span><span class="rq-x">×</span></div>
+                <div class="rreq"><span class="rq-m" style="color:var(--text-secondary)">GET</span><span class="rq-n">Profilim</span><span class="rq-run">▶</span><span class="rq-x">×</span></div>
+                <div class="rgrp"><span class="rg-c">▾</span><span class="rg-n">Sepet</span><span class="rg-cnt">2</span><span class="rg-x">×</span></div>
+                <div class="rreq"><span class="rq-m" style="color:var(--amber-bright)">PUT</span><span class="rq-n">Ürün ekle</span><span class="rq-run">▶</span><span class="rq-x">×</span></div>
+                <div class="rreq"><span class="rq-m" style="color:var(--red-bright)">DELETE</span><span class="rq-n">Ürün çıkar</span><span class="rq-run">▶</span><span class="rq-x">×</span></div>
+                <div class="rgrp"><span class="rg-c">▾</span><span class="rg-n">Ödeme</span><span class="rg-cnt">1</span><span class="rg-x">×</span></div>
+                <div class="rreq"><span class="rq-m" style="color:var(--green-bright)">POST</span><span class="rq-n">Checkout</span><span class="rq-run">▶</span><span class="rq-x">×</span></div>
+                <div class="rungroup">Ungrouped</div>
+                <div class="rdrop">Grup dışına çıkarmak için buraya sürükle</div>
               </div>
             </div>
+            <!-- Composer -->
             <div class="pmain" id="remote-main">
-              <div class="banner info">Bir istek oluştur, gönder ve yanıtı incele. Kısayol: See'de bir isteğe sağ tıkla → “Remote'a Gönder”; tüm alanlar otomatik dolar. <span class="kbd">⌘↵</span> ile çalıştır.</div>
+              <div class="banner info">Bir request oluştur ve gönder. See'de bir isteğe sağ tıklayıp <b>“Remote Map'e Ekle”</b> dersen method, URL, header (cookie/Authorization dahil) ve body buraya taşınır — yakalanan auth ile henüz implemente edilmemiş servisleri deneyebilirsin.</div>
+              <div style="display:flex;gap:8px;margin-bottom:12px">
+                <div class="btn sm" id="remote-curl-btn">Import cURL</div>
+                <div class="btn sm" id="remote-copycurl">Copy as cURL</div>
+              </div>
               <div id="remote-curl" style="display:none;margin-bottom:12px;border:1px solid var(--accent-border);border-radius:8px;padding:10px;background:var(--accent-wash)">
-                <label style="display:block;font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:5px">cURL yapıştır (terminalden / tarayıcının “Copy as cURL”'ünden)</label>
-                <textarea class="inp" id="remote-curl-in" style="min-height:64px">curl 'https://api.market.app/v1/cart/items' -X PUT -H 'authorization: Bearer eyJhbGciOi…' -H 'content-type: application/json' --data '{"productId":302,"qty":2}'</textarea>
+                <label style="display:block;font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:5px">cURL yapıştır <span style="color:var(--text-faint);font-weight:400">— ⌘/Ctrl+Enter ile çalıştır · Esc ile kapat</span></label>
+                <textarea class="inp" id="remote-curl-in" style="min-height:60px">curl 'https://api.market.app/v1/cart/items' -X PUT -H 'authorization: Bearer eyJhbGciOi…' -H 'content-type: application/json' --data '{"productId":302,"qty":2}'</textarea>
                 <div style="display:flex;gap:8px;margin-top:7px"><div class="btn accent sm" id="remote-curl-do">İçe Aktar →</div><div class="btn sm" id="remote-curl-cancel">İptal</div></div>
               </div>
-              <div style="display:flex;gap:8px;margin-bottom:10px" id="remote-line">
-                <select class="inp" style="width:110px;color:var(--green-bright);font-weight:700">
-                  <option>POST</option><option>GET</option><option>PUT</option><option>PATCH</option><option>DELETE</option>
+              <div style="display:flex;gap:8px;margin-bottom:12px" id="remote-line">
+                <select class="inp" style="width:104px;color:var(--green-bright);font-weight:700">
+                  <option>POST</option><option>GET</option><option>PUT</option><option>PATCH</option><option>DELETE</option><option>HEAD</option><option>OPTIONS</option>
                 </select>
                 <input class="inp" style="flex:1" value="https://api.market.app/api/auth/login">
-                <div class="btn accent" id="remote-send">Gönder →</div>
+                <div class="btn accent" id="remote-save">Kaydet</div>
+                <div class="btn green" id="remote-send">Run</div>
               </div>
-              <div class="field"><label>Headers</label><textarea class="inp" style="min-height:64px">content-type: application/json
-authorization: Bearer eyJhbGciOi…</textarea></div>
-              <div class="field"><label>Body</label><textarea class="inp" style="min-height:90px">{ "email": "deniz@example.com", "password": "••••••••" }</textarea></div>
+              <div class="field"><label>Headers</label><textarea class="inp" style="min-height:60px">authorization: Bearer eyJhbGciOi…
+content-type: application/json</textarea></div>
+              <div class="field"><label style="display:flex;align-items:center;justify-content:space-between">Body <span class="btn sm" id="remote-fmt" style="font-weight:600">Format</span></label><textarea class="inp" id="remote-body" style="min-height:84px">{ "email": "deniz@example.com", "password": "••••••••" }</textarea></div>
               <div id="remote-resp" style="margin-top:6px">
-                <div class="plabel">YANIT</div>
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;font-family:var(--mono);font-size:12px"><span class="pill g">200 OK</span><span style="color:var(--text-muted)">234 ms · 1.2 KB</span></div>
+                <div class="plabel">Response</div>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;font-family:var(--mono);font-size:12px"><span class="pill g">200</span><span style="color:var(--text-muted)">234 ms</span></div>
                 <div class="json" style="white-space:pre;font-family:var(--mono);font-size:12px;line-height:1.7">{
   <span class="k">"token"</span>: <span class="s">"eyJhbGciOi…"</span>,
   <span class="k">"expiresIn"</span>: <span class="n">3600</span>,
@@ -850,6 +895,28 @@ authorization: Bearer eyJhbGciOi…</textarea></div>
             <span class="dsx" id="ds-close">×</span>
           </div>
           <div class="dsbody" id="ds-body"></div>
+        </div>
+
+        <!-- Snapshot karşılaştırma modal (MockComparePanel) -->
+        <div class="diffscreen" id="mcmp">
+          <div class="mcmp-h">
+            <h3>⇄ Mock Karşılaştırma</h3>
+            <span class="mcmp-pill a">A: Android — Login</span>
+            <span style="color:var(--text-muted)">vs</span>
+            <span class="mcmp-pill b">B: iOS — Login</span>
+            <span class="mcmp-stat" id="mcmp-stat"></span>
+            <span style="margin-left:auto;display:flex;gap:8px;align-items:center">
+              <span class="btn sm" id="mcmp-export">Dışa Aktar ▾</span>
+              <span class="dsx" id="mcmp-close">×</span>
+            </span>
+          </div>
+          <div class="mcmp-body">
+            <div class="mcmp-side">
+              <div class="mcmp-ftabs" id="mcmp-ftabs"></div>
+              <div class="mcmp-eplist" id="mcmp-eplist"></div>
+            </div>
+            <div class="mcmp-detail" id="mcmp-detail"></div>
+          </div>
         </div>
 
       </div><!-- /#app -->
@@ -1054,10 +1121,11 @@ authorization: Bearer eyJhbGciOi…</textarea></div>
     $$(".view").forEach(function(v){v.classList.toggle("show",v.getAttribute("data-view")===name)});
     $$(".tab").forEach(function(t){t.classList.toggle("active",t.getAttribute("data-tab")===name)});
     $("#substrip").classList.toggle("hidden",name!=="see");
+    var mc=$("#mcmp");if(mc)mc.classList.remove("show");var df=$("#diffscreen");if(df)df.classList.remove("show");
     if(name==="format")fmtRun();
   }
   $$(".tab").forEach(function(t){t.addEventListener("click",function(){var n=t.getAttribute("data-tab");showView(n);syncFlowbar(n)})});
-  $$(".subtab").forEach(function(t){t.addEventListener("click",function(){var p=t.parentNode;$$(".subtab",p).forEach(function(x){x.classList.remove("active")});t.classList.add("active");var sub=t.getAttribute("data-sub");if(sub)showSub(sub);var rs=t.getAttribute("data-rsub");if(rs)showRsub(rs)})});
+  $$(".subtab").forEach(function(t){t.addEventListener("click",function(){var p=t.parentNode;$$(".subtab",p).forEach(function(x){x.classList.remove("active")});t.classList.add("active");var sub=t.getAttribute("data-sub");if(sub)showSub(sub)})});
 
   /* Format */
   function fmtRun(){try{var v=JSON.parse($("#fmt-in").value);$("#fmt-out").innerHTML='<div class="plabel" style="font-family:var(--sans)">FORMATLANMIŞ ÇIKTI · GEÇERLİ JSON</div><div class="json">'+jsonHtml(v)+'</div>'}catch(e){$("#fmt-out").innerHTML='<div class="banner warn" style="font-family:var(--sans)">Geçersiz JSON: '+esc(e.message)+'</div>'}}
@@ -1066,43 +1134,59 @@ authorization: Bearer eyJhbGciOi…</textarea></div>
   /* SSL mode cards */
   $$("#ssl-modes .modecard").forEach(function(c){c.addEventListener("click",function(){$$("#ssl-modes .modecard").forEach(function(x){x.classList.remove("on")});c.classList.add("on");$("#ssl-include").style.display=c.getAttribute("data-mode")==="focus"?"":"none"})});
 
-  /* Replay — Snapshot / Akış paneli geçişi + içe/dışa aktar + PDF + yeni akış */
-  function showRsub(sub){$$('.subtab[data-rsub]').forEach(function(x){x.classList.toggle("active",x.getAttribute("data-rsub")===sub)});
-    $("#replay-mocks").style.display=sub==="mocks"?"":"none";$("#replay-compare").style.display=sub==="compare"?"":"none"}
+  /* Replay — snapshot içe/dışa aktar + PDF */
   function bindClick(sel,fn){var el=$(sel);if(el)el.addEventListener("click",fn)}
   bindClick("#snap-import",function(){showToast("⬆ Snapshot içe aktarıldı (snapshot.json)")});
   bindClick("#snap-export",function(){showToast("⬇ Snapshot dışa aktarıldı → snapshot.json")});
   bindClick("#snap-pdf",function(){showToast("📄 PDF indirildi → snapshot-raporu.pdf")});
 
-  /* 2 snapshot karşılaştırma — Android Login Flow ↔ iOS Login Flow (dashboard'a kadar) */
-  var CMP={
-    login:{m:"POST",p:"/api/auth/login",st:"diff",
-      req:{a:[{t:"x-platform: android",k:"chg"},{t:"user-agent: MarketApp/4.2 okhttp/4.12",k:"chg"},{t:'"device": "Pixel 8 · Android 14"',k:"chg"}],
-           b:[{t:"x-platform: ios",k:"chg"},{t:"user-agent: MarketApp/4.2 CFNetwork",k:"chg"},{t:'"device": "iPhone15,2 · iOS 17.4"',k:"chg"}]},
-      res:{a:[{t:'"pushProvider": "fcm",',k:"chg"},{t:'"token": "eyJhbGciOi…",'},{t:'"tier": "premium"'}],
-           b:[{t:'"pushProvider": "apns",',k:"chg"},{t:'"token": "eyJhbGciOi…",'},{t:'"tier": "premium"'}]}},
+  /* Snapshot karşılaştırma modal (MockComparePanel) — Android Login ↔ iOS Login */
+  var MCMP={
+    login:{m:"POST",p:"/api/auth/login",st:"diff",sa:200,sb:200,
+      req:[{t:"chg",path:"header · x-platform",a:"android",b:"ios"},{t:"chg",path:"header · user-agent",a:"…okhttp/4.12",b:"…CFNetwork"},{t:"chg",path:"body · device",a:"Pixel 8 · Android 14",b:"iPhone15,2 · iOS 17.4"}],
+      res:[{t:"chg",path:"pushProvider",a:"fcm",b:"apns"}]},
     me:{m:"GET",p:"/v1/users/me",st:"same"},
-    config:{m:"GET",p:"/v1/config",st:"diff",
-      res:{a:[{t:'"flags": {'},{t:'  "newCheckout": true,'},{t:'  "androidWidget": true',k:"add"},{t:"}"}],
-           b:[{t:'"flags": {'},{t:'  "newCheckout": true,'},{t:'  "iosLiveActivity": true',k:"add"},{t:"}"}]}},
+    config:{m:"GET",p:"/v1/config",st:"diff",sa:200,sb:200,
+      req:[],res:[{t:"del",path:"flags.androidWidget",a:"true"},{t:"add",path:"flags.iosLiveActivity",b:"true"}]},
     feed:{m:"GET",p:"/v1/feed?page=1",st:"same"},
-    telemetry:{m:"POST",p:"/telemetry/track",st:"onlyA"}
+    telemetry:{m:"POST",p:"/telemetry/track",st:"onlyA",sa:204}
   };
-  var CMP_ORDER=["login","me","config","feed","telemetry"],cmpSel="login";
-  var CMP_BADGE={same:["same","✓ aynı"],diff:["diff","⚠ farklı"],onlyA:["onlyA","Ⓐ sadece Android"],onlyB:["onlyB","Ⓑ sadece iOS"]};
-  function renderCmpList(){var el=$("#cmp-list");if(!el)return;
-    el.innerHTML=CMP_ORDER.map(function(k){var d=CMP[k];var b=CMP_BADGE[d.st];
-      return '<div class="cmprow'+(k===cmpSel?' sel':'')+'" data-k="'+k+'"><span class="method-tag" style="color:'+(METHOD_COLOR[d.m]||"#a1a1aa")+'">'+d.m+'</span><span class="cp">'+esc(d.p)+'</span><span class="cmpbadge '+b[0]+'">'+b[1]+'</span></div>'}).join("");
-    $$("#cmp-list .cmprow").forEach(function(row){row.addEventListener("click",function(){cmpSel=row.getAttribute("data-k");renderCmpList();renderCmpDetail()})})}
-  function renderCmpDetail(){var el=$("#cmp-detail");if(!el)return;var d=CMP[cmpSel];var html='';
-    if(d.st==="same")html='<div class="banner ok">✓ <b>'+d.m+' '+esc(d.p)+'</b> — Android ve iOS arasında request/response farkı yok.</div>';
-    else if(d.st==="onlyA")html='<div class="banner" style="border-left:3px solid var(--blue);background:var(--blue-bg);color:var(--blue-bright)">Ⓐ <b>'+d.m+' '+esc(d.p)+'</b> — yalnızca <b>Android</b> snapshot\'ında var. iOS bu telemetri çağrısını dashboard\'a kadar hiç yapmıyor.</div>';
-    else{html='<h4 style="margin:2px 0 10px;font-size:13px">'+d.m+' '+esc(d.p)+' — Android ↔ iOS farkı</h4>';
-      if(d.req)html+='<div class="plabel">REQUEST</div>'+diffCols("Ⓐ Android","Ⓑ iOS",d.req.a,d.req.b);
-      if(d.res)html+='<div class="plabel" style="margin-top:14px">RESPONSE</div>'+diffCols("Ⓐ Android","Ⓑ iOS",d.res.a,d.res.b);
-      html+='<div class="difflegend"><span><span style="color:var(--amber-bright)">■</span> değişti</span><span><span style="color:var(--green-bright)">■</span> platforma özel alan</span></div>'}
-    el.innerHTML=html}
-  renderCmpList();renderCmpDetail();
+  var MCMP_ORDER=["login","me","config","feed","telemetry"];
+  function mcmpGroup(f){return MCMP_ORDER.filter(function(k){var s=MCMP[k].st;return f==="differing"?s==="diff":f==="onlyA"?s==="onlyA":f==="onlyB"?s==="onlyB":s==="same"})}
+  var mcmpFilter="differing",mcmpSel="login",mcmpSec="all";
+  function mcmpStatus(d){return (d.sa!=null&&d.sb!=null&&d.sa!==d.sb)?d.sa+" → "+d.sb:(d.sa!=null?String(d.sa):"")}
+  function diffRow(d){var sym=d.t==="add"?"+":d.t==="del"?"−":"~";
+    var vals=d.t==="chg"?'<span class="vchip old">'+esc(d.a)+'</span> → <span class="vchip new">'+esc(d.b)+'</span>':d.t==="add"?'<span class="vchip new">'+esc(d.b)+'</span>':'<span class="vchip old">'+esc(d.a)+'</span>';
+    return '<div class="diffrow"><span class="dt '+d.t+'">'+sym+'</span><span class="dpath">'+esc(d.path)+'</span><span class="dvals">'+vals+'</span></div>'}
+  function renderMcmpDetail(){var el=$("#mcmp-detail");if(!el)return;var d=mcmpSel?MCMP[mcmpSel]:null;
+    if(!d){el.innerHTML='<div style="color:var(--text-faint);font-size:12px">Soldan bir endpoint seçin.</div>';return}
+    if(d.st==="same"){el.innerHTML='<div class="banner ok">✓ <b>'+d.m+' '+esc(d.p)+'</b> — iki snapshot arasında fark yok.</div>';return}
+    if(d.st==="onlyA"){el.innerHTML='<div class="banner" style="border-left:3px solid var(--blue);background:var(--blue-bg);color:var(--blue-bright)">Ⓐ <b>'+d.m+' '+esc(d.p)+'</b> — yalnızca <b>Android</b>\'de var; iOS dashboard\'a kadar bu çağrıyı yapmıyor.</div>';return}
+    var html='<div style="font-family:var(--mono);font-size:13px;margin-bottom:12px"><span class="method-tag" style="color:'+(METHOD_COLOR[d.m])+'">'+d.m+'</span> '+esc(d.p)+'</div>';
+    var SEC=[["all","Tümü"],["request","Request"],["response","Response"]];
+    html+='<div class="mcmp-sect">'+SEC.map(function(s){return '<span class="'+(s[0]===mcmpSec?'on':'')+'" data-s="'+s[0]+'">'+s[1]+'</span>'}).join("")+'</div>';
+    if(d.sa!==d.sb)html+='<div class="statuscard"><div class="lbl">Status Code</div>'+d.sa+' (A) → '+d.sb+' (B)</div>';
+    if((mcmpSec==="all"||mcmpSec==="request")&&d.req&&d.req.length)html+='<div class="difftitle">Request — '+d.req.length+' fark</div>'+d.req.map(diffRow).join("");
+    if((mcmpSec==="all"||mcmpSec==="response")&&d.res&&d.res.length)html+='<div class="difftitle res">Response — '+d.res.length+' fark</div>'+d.res.map(diffRow).join("");
+    el.innerHTML=html;
+    $$("#mcmp-detail .mcmp-sect span").forEach(function(s){s.addEventListener("click",function(){mcmpSec=s.getAttribute("data-s");renderMcmpDetail()})})}
+  function renderMcmp(){
+    var nDiff=mcmpGroup("differing").length+mcmpGroup("onlyA").length+mcmpGroup("onlyB").length,nSame=mcmpGroup("matching").length;
+    $("#mcmp-stat").textContent=nDiff+" fark · "+nSame+" eşleşme";
+    var FT=[["differing","Değişen"],["onlyA","Sadece A"],["onlyB","Sadece B"],["matching","Aynı"]];
+    $("#mcmp-ftabs").innerHTML=FT.map(function(f){return '<span class="mcmp-ftab'+(f[0]===mcmpFilter?' on':'')+'" data-f="'+f[0]+'">'+f[1]+' ('+mcmpGroup(f[0]).length+')</span>'}).join("");
+    $$("#mcmp-ftabs .mcmp-ftab").forEach(function(t){t.addEventListener("click",function(){mcmpFilter=t.getAttribute("data-f");var g=mcmpGroup(mcmpFilter);if(g.indexOf(mcmpSel)<0)mcmpSel=g[0]||null;renderMcmp()})});
+    var list=mcmpGroup(mcmpFilter);
+    $("#mcmp-eplist").innerHTML=list.length?list.map(function(k){var d=MCMP[k];
+      return '<div class="mcmp-ep'+(k===mcmpSel?' sel':'')+'" data-k="'+k+'"><span class="method-tag" style="color:'+(METHOD_COLOR[d.m]||"#a1a1aa")+'">'+d.m+'</span><span class="ep-p">'+esc(d.p)+'</span><span class="ep-s">'+mcmpStatus(d)+'</span></div>'}).join(""):'<div style="padding:16px 10px;color:var(--text-faint);font-size:11.5px">Bu kategoride endpoint yok.</div>';
+    $$("#mcmp-eplist .mcmp-ep").forEach(function(e){e.addEventListener("click",function(){mcmpSel=e.getAttribute("data-k");renderMcmp()})});
+    renderMcmpDetail()}
+  function openMcmp(){mcmpFilter="differing";mcmpSel="login";mcmpSec="all";renderMcmp();$("#mcmp").classList.add("show")}
+  function closeMcmp(){$("#mcmp").classList.remove("show")}
+  bindClick("#snap-compare",openMcmp);
+  bindClick("#snap-compare2",openMcmp);
+  bindClick("#mcmp-close",closeMcmp);
+  bindClick("#mcmp-export",function(){showToast("📄 Karşılaştırma raporu indirildi (PDF / Markdown)")});
 
   /* Remote — cURL içe aktarma (yapıştır → method/URL/header/body otomatik dolar) */
   function importCurl(){
@@ -1119,6 +1203,12 @@ authorization: Bearer eyJhbGciOi…</textarea></div>
   bindClick("#remote-curl-btn",function(){var el=$("#remote-curl");if(el)el.style.display=el.style.display==="none"?"":"none"});
   bindClick("#remote-curl-do",importCurl);
   bindClick("#remote-curl-cancel",function(){var el=$("#remote-curl");if(el)el.style.display="none"});
+  bindClick("#remote-copycurl",function(){showToast("📋 cURL panoya kopyalandı (Copy as cURL)")});
+  bindClick("#remote-save",function(){showToast("★ İstek SAVED'e kaydedildi")});
+  bindClick("#remote-send",function(){showToast("▶ İstek gönderildi · 200 · 234 ms")});
+  bindClick("#remote-newmap",function(){showToast("Yeni boş istek — alanları doldurup Kaydet/Run")});
+  bindClick("#remote-group",function(){showToast("＋ Yeni grup oluşturuldu")});
+  bindClick("#remote-fmt",function(){var b=$("#remote-body");if(!b)return;try{b.value=JSON.stringify(JSON.parse(b.value),null,2);showToast("Body formatlandı")}catch(e){showToast("Geçersiz JSON")}});
 
   /* Toggles */
   $("#sysproxy").addEventListener("click",function(){this.classList.toggle("on")});
@@ -1287,21 +1377,20 @@ authorization: Bearer eyJhbGciOi…</textarea></div>
       {sel:"#ssl-include",title:"Odak listesi",body:"Yakalanacak domainleri ekle (örn. api.example.com). Listede olmayan her host doğrudan internete çıkar; Instagram, WhatsApp etkilenmez.",pad:4}
     ]},
     "remote":{label:"Remote",setup:function(){closeModal();showView("remote");var b=$("#remote-curl");if(b)b.style.display="none"},wait:200,steps:[
-      {sel:"#remote-line",title:"İstek oluştur",body:"Method, URL, header ve gövdeyi elle yazıp sunucuya istek gönder — yerleşik bir istek oluşturucu (Postman benzeri). Backend'i uygulama olmadan denemenin yolu.",pad:4},
-      {sel:".view[data-view='remote'] .pside-list",title:"Kaydet & gruplama",body:"Sık kullandığın istekleri kaydedip GRUPLARA ayırırsın — Auth, Sepet, Ödeme… Tek tıkla geri yükle; endpoint koleksiyonunu düzenli tut (Postman koleksiyonu gibi).",pad:4},
-      {sel:"#remote-curl",title:"cURL içe aktar",body:"Terminalden veya tarayıcının ‘Copy as cURL’ özelliğinden kopyaladığın komutu yapıştır → method, URL, header ve body OTOMATİK ayrıştırılıp alanlara dolar. Hızlı tekrar/deneme için.",act:function(){var b=$("#remote-curl");if(b)b.style.display=""},pad:6},
-      {sel:"#remote-send",title:"Gönder",body:"İsteği gönder; yanıt aşağıda durum kodu, süre ve gövdeyle görünür. ⌘↵ kısayolu da çalışır.",act:function(){var b=$("#remote-curl");if(b)b.style.display="none"},pad:4},
-      {sel:"#remote-resp",title:"Yanıt",body:"Dönen yanıtı JSON ağacı olarak incele. İpucu: See'de bir isteğe sağ tıklayıp ‘Remote'a Gönder’ dersen tüm alanlar buraya otomatik dolar.",pad:4}
+      {sel:"#remote-newmap",title:"+ Remote Map",body:"Sıfırdan istek oluşturucu (mini-Postman). See'de bir isteğe sağ tık → ‘Remote Map'e Ekle’ dersen yakalanan method/URL/header (cookie + Authorization) ve body buraya taşınır — henüz yazılmamış servisleri gerçek auth ile dener.",pad:4},
+      {sel:".view[data-view='remote'] .pside-list",title:"SAVED & gruplama",body:"Kaydettiğin istekler SAVED altında gruplara ayrılır (Auth, Sepet, Ödeme…). ▶ ile çalıştır, × ile sil, satırı sürükleyip grup değiştir; ‘Ungrouped’ grupsuzlar içindir. ‘+ Group’ ile yeni grup.",pad:4},
+      {sel:"#remote-curl-btn",title:"Import / Copy cURL",body:"‘Import cURL’ → yapıştırdığın komutu ayrıştırıp method/URL/header/body alanlarını doldurur. ‘Copy as cURL’ → mevcut isteği terminal komutu olarak panoya kopyalar.",act:function(){var b=$("#remote-curl");if(b)b.style.display=""},pad:4},
+      {sel:"#remote-line",title:"Method · URL · Kaydet · Run",body:"Method ve URL'i gir; <b>Kaydet</b> (mor) SAVED'e ekler, <b>Run</b> (yeşil) sunucuya gönderir. ⌘↵ kısayolu da çalışır.",act:function(){var b=$("#remote-curl");if(b)b.style.display="none"},pad:4},
+      {sel:"#remote-resp",title:"Response",body:"Dönen yanıt durum kodu, süre ve gövdeyle görünür. Body'yi ‘Format’ ile güzelleştirebilirsin.",pad:4}
     ]},
-    "replay":{label:"Replay",setup:function(){closeModal();showView("replay");showRsub("mocks")},wait:200,steps:[
-      {sel:"#replay-subtabs",title:"Mock & Karşılaştır",body:"Replay iki şey sunar: API yanıtlarının anlık görüntüsü (Snapshot) ve aynı servisin iki çağrısını yan yana karşılaştırma (Diff).",act:function(){showRsub("mocks")},pad:4},
+    "replay":{label:"Replay",setup:function(){closeModal();closeMcmp();showView("replay")},wait:200,steps:[
       {sel:"#replay-rec",title:"Snapshot kaydet / içe aktar",body:"‘● Kaydet’ ile canlı trafiği bir snapshot'a alırsın; ‘İçe Aktar’ ile başkasının snapshot'ını yüklersin. Aktif snapshot eşleşen isteklere sunucuya gitmeden yanıt verir.",pad:4},
       {sel:"#replay-main .banner",title:"Etkinleştir",body:"Snapshot aktifken eşleşen istekler kayıttan yanıtlanır — çevrimdışı, deterministik test. Üstte yeşil ‘Mock Aktif’ rozeti görünür.",pad:4},
       {sel:"#snap-export",title:"Dışa / İçe Aktar (JSON)",body:"Snapshot'ı JSON olarak dışa aktarıp ekiple paylaş; ‘İçe Aktar’ ile geri yükle. Mock'lar repoya/PR'a taşınabilir.",act:function(){var b=$("#snap-export");if(b)b.click()},pad:4},
-      {sel:"#snap-pdf",title:"PDF olarak indir",body:"Snapshot ve endpoint'lerini PDF rapor olarak indir — dokümantasyon veya paylaşım için.",act:function(){var b=$("#snap-pdf");if(b)b.click()},pad:4},
-      {sel:"#replay-subtabs .subtab[data-rsub='compare']",title:"Karşılaştır (2 snapshot)",body:"Şimdi iki snapshot karşılaştırmasına geçelim — örn. Android ve iOS login akışı.",act:function(){showRsub("compare")},pad:4},
-      {sel:"#cmp-list",title:"İki snapshot, servis servis",body:"Üstten iki snapshot seç (Android Login ↔ iOS Login). Dashboard'a gelene kadar çağrılan servisler listelenir; her biri ‘aynı / farklı / sadece bir platformda’ olarak işaretlenir.",pad:4},
-      {sel:"#cmp-detail",title:"Request/response farkı",body:"Bir servise tıkla → o servisin iki snapshot arasındaki request ve response farkı satır satır renklenir. Header, push provider (FCM↔APNS), feature flag, eksik çağrı gibi platform tutarsızlıklarını yakalar.",pad:6}
+      {sel:"#snap-pdf",title:"PDF olarak indir",body:"Snapshot ve endpoint'lerini PDF rapor olarak indir.",act:function(){var b=$("#snap-pdf");if(b)b.click()},pad:4},
+      {sel:"#snap-compare",title:"⇄ Karşılaştır (2 snapshot)",body:"‘Karşılaştır’ moduna gir, iki snapshot seç (örn. Android Login ↔ iOS Login). Açılan tam ekran karşılaştırma penceresinde dashboard'a kadarki servislerin farkları gösterilir.",act:function(){openMcmp()},pad:4},
+      {sel:"#mcmp-ftabs",title:"Değişen / Sadece A / Sadece B / Aynı",body:"Servisler dört kategoriye ayrılır: farkı olanlar, yalnız bir platformda olanlar ve özdeş olanlar. Üstte toplam fark/eşleşme sayısı görünür.",pad:4},
+      {sel:"#mcmp-detail",title:"Parametre bazlı fark",body:"Bir servise tıkla → request/response farkları parametre parametre: ~ değişti, + eklendi, − silindi. push provider (fcm→apns), feature flag, header farkları net görünür; PDF/Markdown olarak dışa aktarılır.",act:function(){mcmpSel="login";mcmpSec="all";renderMcmp()},pad:6}
     ]},
     "format":{label:"Format",setup:function(){closeModal();showView("format");fmtRun()},wait:200,steps:[
       {sel:"#fmt-in",title:"JSON girişi",body:"Herhangi bir JSON'u yapıştır — minified, kaçışlı, karışık. Nesne, dizi ve iç içe yapıları destekler.",pad:4},
