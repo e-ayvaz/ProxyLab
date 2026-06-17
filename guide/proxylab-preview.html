@@ -174,6 +174,30 @@
   .dl.chg{background:rgba(245,158,11,.16);border-left:2px solid var(--amber)}
   .difflegend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:11px;color:var(--text-muted)}
   .difflegend b{font-weight:400}
+  /* Snapshot karşılaştırma (Replay) — endpoint tablosu */
+  .cmpsel{display:flex;gap:10px;align-items:center;margin:8px 0 14px;flex-wrap:wrap}
+  .cmpsel .inp{width:auto;min-width:200px}
+  .cmplist{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px}
+  .cmprow{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border);cursor:pointer;font-family:var(--mono);font-size:11.5px}
+  .cmprow:last-child{border-bottom:0}
+  .cmprow:hover{background:var(--bg-tertiary)}
+  .cmprow.sel{background:var(--accent-wash)}
+  .cmprow .cp{flex:1;min-width:0;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cmpbadge{font-size:9.5px;font-weight:700;border-radius:4px;padding:2px 8px;font-family:var(--sans);flex-shrink:0}
+  .cmpbadge.same{background:var(--green-bg);color:var(--green-bright)}
+  .cmpbadge.diff{background:var(--amber-bg);color:var(--amber-bright)}
+  .cmpbadge.onlyA{background:var(--blue-bg);color:var(--blue-bright)}
+  .cmpbadge.onlyB{background:var(--purple-bg);color:var(--purple)}
+  /* See — Diff ekranı (Set A / Set B ile açılır overlay) */
+  .diffscreen{position:absolute;inset:0;z-index:39;display:none;flex-direction:column;background:var(--bg-primary)}
+  .diffscreen.show{display:flex}
+  .diffscreen .dsh{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--border);flex-shrink:0}
+  .diffscreen .dsh h3{margin:0;font-size:14px;font-weight:600}
+  .diffscreen .dsh .ab{font-family:var(--mono);font-size:11px;color:var(--text-secondary)}
+  .diffscreen .dsh .ab .a{color:var(--cyan-bright)}.diffscreen .dsh .ab .b{color:var(--accent-text)}
+  .diffscreen .dsx{margin-left:auto;cursor:pointer;color:var(--text-muted);font-size:20px;line-height:1;padding:2px 8px;border-radius:5px}
+  .diffscreen .dsx:hover{background:rgba(255,255,255,.06);color:var(--text-primary)}
+  .diffscreen .dsbody{flex:1;overflow-y:auto;padding:18px}
 
   /* Body + views */
   .body{flex:1;display:flex;min-height:0;position:relative}
@@ -683,43 +707,18 @@ authorization: Bearer eyJhbGciOi…
                 <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><div class="btn">Devre Dışı Bırak</div><div class="btn">Karşılaştır</div><div class="btn" id="snap-export">⬇ Dışa Aktar (JSON)</div><div class="btn" id="snap-pdf">📄 PDF İndir</div></div>
               </div>
             </div>
-            <!-- KARŞILAŞTIR (DIFF) PANE -->
+            <!-- 2 SNAPSHOT KARŞILAŞTIRMA PANE -->
             <div class="pane" id="replay-compare" style="display:none">
               <div class="pmain" style="padding:18px 22px">
-                <div class="banner info">Aynı servisin iki farklı çağrısını yan yana karşılaştır — <b>değişen</b>, <b>eklenen</b> ve <b>silinen</b> alanlar renklenir. Regresyon ve “API ne zaman değişti?” avı için. See'de bir yanıta sağ tık → ‘Diff için İşaretle (A)’, ikincisine ‘(B)’.</div>
-                <div style="display:flex;align-items:center;gap:10px;margin:6px 0 12px;font-family:var(--mono);font-size:12.5px">
-                  <span class="pill c">GET</span><b style="font-weight:600">api.market.app/v1/feed?page=1</b>
-                  <span style="color:var(--text-muted);font-family:var(--sans);font-size:11.5px">— aynı endpoint, iki çağrı</span>
+                <div class="banner info">İki mock snapshot'ı karşılaştır. Örnek: <b>Android</b> ve <b>iOS</b> login akışında <b>dashboard'a gelene kadar</b> çağrılan servislerin request/response farkları — platform tutarsızlıklarını yakalamak için.</div>
+                <div class="cmpsel">
+                  <select class="inp"><option>Ⓐ Android — Login Flow · 5 servis</option><option>Ödeme akışı v2</option></select>
+                  <span style="color:var(--text-muted)">↔</span>
+                  <select class="inp"><option>Ⓑ iOS — Login Flow · 4 servis</option><option>Boş sepet senaryosu</option></select>
                 </div>
-                <div class="diffcols">
-                  <div class="diffcol">
-                    <div class="dh">Ⓐ Çağrı A — 14:02:11 · 200 · 18.0 KB</div>
-                    <pre>{
-  <span class="dk">"page"</span>: 1,
-  <span class="dk">"items"</span>: [
-<span class="dl chg">    { "id": 301, "price": 1299.9, "stock": 5 },</span>
-    { "id": 302, "price": 2150, "stock": 12 },
-  ],
-<span class="dl chg">  "total": 417</span>
-}</pre>
-                  </div>
-                  <div class="diffcol">
-                    <div class="dh">Ⓑ Çağrı B — 14:05:48 · 200 · 18.4 KB</div>
-                    <pre>{
-  <span class="dk">"page"</span>: 1,
-  <span class="dk">"items"</span>: [
-<span class="dl chg">    { "id": 301, "price": 1199.9, "stock": 0 },</span>
-    { "id": 302, "price": 2150, "stock": 12 },
-<span class="dl add">    { "id": 303, "price": 149.9, "stock": 30 },</span>
-  ],
-<span class="dl chg">  "total": 418</span>
-}</pre>
-                  </div>
-                </div>
-                <div class="difflegend">
-                  <span><span style="color:var(--amber-bright)">■</span> <b>Değişti</b> — id 301: price 1299.9→1199.9, stock 5→0 · total 417→418</span>
-                  <span><span style="color:var(--green-bright)">■</span> <b>Eklendi</b> — id 303 (yeni ürün)</span>
-                </div>
+                <div style="font-size:11px;color:var(--text-faint);margin-bottom:6px">DASHBOARD'A KADAR ÇAĞRILAN SERVİSLER</div>
+                <div class="cmplist" id="cmp-list"></div>
+                <div id="cmp-detail"></div>
               </div>
             </div>
           </div>
@@ -727,17 +726,25 @@ authorization: Bearer eyJhbGciOi…
           <!-- ===== REMOTE VIEW (Request Composer) ===== -->
           <div class="view vrow" data-view="remote">
             <div class="pside" style="width:280px">
-              <div class="pside-head"><h3>Kayıtlı İstekler</h3><div class="btn green sm">+ Yeni</div></div>
+              <div class="pside-head"><h3>Kayıtlı İstekler</h3><div style="display:flex;gap:6px"><div class="btn sm" id="remote-curl-btn">⤓ cURL</div><div class="btn green sm">+ Yeni</div></div></div>
               <div class="pside-list">
-                <div class="fb-group" style="padding:6px 8px">Auth</div>
+                <div class="fb-group" style="padding:6px 8px">▾ Auth <span style="color:var(--text-faint);font-weight:400">· 2</span></div>
                 <div class="litem sel"><div class="lt"><span class="method-tag" style="color:var(--green-bright)">POST</span><b>Login</b></div><div class="lsub">/api/auth/login</div></div>
                 <div class="litem"><div class="lt"><span class="method-tag" style="color:var(--text-secondary)">GET</span><b>Profilim</b></div><div class="lsub">/v1/users/me</div></div>
-                <div class="fb-group" style="padding:10px 8px 6px">Sepet</div>
+                <div class="fb-group" style="padding:10px 8px 6px">▾ Sepet <span style="color:var(--text-faint);font-weight:400">· 2</span></div>
                 <div class="litem"><div class="lt"><span class="method-tag" style="color:var(--amber-bright)">PUT</span><b>Ürün ekle</b></div><div class="lsub">/v1/cart/items</div></div>
+                <div class="litem"><div class="lt"><span class="method-tag" style="color:var(--red-bright)">DELETE</span><b>Ürün çıkar</b></div><div class="lsub">/v1/cart/items/:id</div></div>
+                <div class="fb-group" style="padding:10px 8px 6px">▾ Ödeme <span style="color:var(--text-faint);font-weight:400">· 1</span></div>
+                <div class="litem"><div class="lt"><span class="method-tag" style="color:var(--green-bright)">POST</span><b>Checkout</b></div><div class="lsub">/v1/payments/checkout</div></div>
               </div>
             </div>
             <div class="pmain" id="remote-main">
               <div class="banner info">Bir istek oluştur, gönder ve yanıtı incele. Kısayol: See'de bir isteğe sağ tıkla → “Remote'a Gönder”; tüm alanlar otomatik dolar. <span class="kbd">⌘↵</span> ile çalıştır.</div>
+              <div id="remote-curl" style="display:none;margin-bottom:12px;border:1px solid var(--accent-border);border-radius:8px;padding:10px;background:var(--accent-wash)">
+                <label style="display:block;font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:5px">cURL yapıştır (terminalden / tarayıcının “Copy as cURL”'ünden)</label>
+                <textarea class="inp" id="remote-curl-in" style="min-height:64px">curl 'https://api.market.app/v1/cart/items' -X PUT -H 'authorization: Bearer eyJhbGciOi…' -H 'content-type: application/json' --data '{"productId":302,"qty":2}'</textarea>
+                <div style="display:flex;gap:8px;margin-top:7px"><div class="btn accent sm" id="remote-curl-do">İçe Aktar →</div><div class="btn sm" id="remote-curl-cancel">İptal</div></div>
+              </div>
               <div style="display:flex;gap:8px;margin-bottom:10px" id="remote-line">
                 <select class="inp" style="width:110px;color:var(--green-bright);font-weight:700">
                   <option>POST</option><option>GET</option><option>PUT</option><option>PATCH</option><option>DELETE</option>
@@ -829,9 +836,20 @@ authorization: Bearer eyJhbGciOi…</textarea></div>
           <div class="ctxsep"></div>
           <div class="ctxitem" data-act="curl"><span class="ci">⌘</span>cURL Olarak Kopyala</div>
           <div class="ctxitem" data-act="save"><span class="ci">★</span>Kaydet (Saklananlar)</div>
-          <div class="ctxitem" data-act="diff"><span class="ci">⇄</span>Diff için İşaretle (A/B)</div>
+          <div class="ctxitem" data-act="diffA"><span class="ci">Ⓐ</span>Diff için İşaretle (A)</div>
+          <div class="ctxitem" data-act="diffB"><span class="ci">Ⓑ</span>Diff için İşaretle (B) → aç</div>
           <div class="ctxsep"></div>
           <div class="ctxitem" data-act="focus"><span class="ci">🎯</span>Bu host'u Kapsam'a ekle</div>
+        </div>
+
+        <!-- See Diff ekranı — Set Diff A / Set Diff B ile açılır -->
+        <div class="diffscreen" id="diffscreen">
+          <div class="dsh">
+            <h3>İstek Karşılaştırma (Diff)</h3>
+            <span class="ab" id="ds-ab"></span>
+            <span class="dsx" id="ds-close">×</span>
+          </div>
+          <div class="dsbody" id="ds-body"></div>
         </div>
 
       </div><!-- /#app -->
@@ -995,6 +1013,27 @@ authorization: Bearer eyJhbGciOi…</textarea></div>
   function showSub(sub){$$('.subtab[data-sub]').forEach(function(x){x.classList.toggle("active",x.getAttribute("data-sub")===sub)});
     $("#scroll").style.display=sub==="all"?"":"none";$("#saved-scroll").style.display=sub==="saved"?"":"none";
     if(sub==="saved")hero.classList.add("gone")}
+  // See Diff — Set A / Set B atanınca açılan ekran (tek isteğin A↔B request/response farkı)
+  var diffA=null,diffB=null;
+  function diffCols(la,lb,linesA,linesB){
+    function pre(lines){return lines.map(function(l){return l.k?'<span class="dl '+l.k+'">'+esc(l.t)+'</span>':esc(l.t)}).join("\n")}
+    return '<div class="diffcols"><div class="diffcol"><div class="dh">'+la+'</div><pre>'+pre(linesA)+'</pre></div>'+
+      '<div class="diffcol"><div class="dh">'+lb+'</div><pre>'+pre(linesB)+'</pre></div></div>'}
+  function openDiffScreen(){
+    if(!diffA){showToast("Önce bir isteğe ‘Diff için İşaretle (A)’ de");return}
+    var A=diffA,B=diffB||diffA;
+    $("#ds-ab").innerHTML='<span class="a">Ⓐ '+esc(A.m+" "+rPath(A))+'</span> &nbsp;↔&nbsp; <span class="b">Ⓑ '+esc(B.m+" "+rPath(B))+'</span>';
+    var reqA=[{t:"POST /api/auth/login HTTP/2"},{t:'user-agent: MarketApp/4.2 (iPhone; iOS 17.4)',k:"chg"},{t:"content-type: application/json"},{t:""},{t:"{"},{t:'  "email": "deniz@example.com",'},{t:'  "device": "iPhone15,2"',k:"chg"},{t:"}"}];
+    var reqB=[{t:"POST /api/auth/login HTTP/2"},{t:'user-agent: MarketApp/4.3 (iPhone; iOS 18.1)',k:"chg"},{t:"content-type: application/json"},{t:""},{t:"{"},{t:'  "email": "deniz@example.com",'},{t:'  "device": "iPhone16,1"',k:"chg"},{t:"}"}];
+    var resA=[{t:"{"},{t:'  "token": "eyJhbGciOi…",'},{t:'  "expiresIn": 3600,',k:"chg"},{t:'  "user": { "id": 8842, "tier": "premium" }'},{t:"}"}];
+    var resB=[{t:"{"},{t:'  "token": "eyJhbGciOi…",'},{t:'  "expiresIn": 7200,',k:"chg"},{t:'  "user": { "id": 8842, "tier": "premium" },'},{t:'  "refreshToken": "rt_9f3a…"',k:"add"},{t:"}"}];
+    $("#ds-body").innerHTML='<div class="banner info">İki çağrının request ve response\'unu satır satır karşılaştırır — değişen alanlar sarı, eklenenler yeşil. Sağ tık → ‘Diff A’, sonra ikinciye ‘Diff B’ ile açılır.</div>'+
+      '<div class="plabel">REQUEST</div>'+diffCols("Ⓐ Çağrı A","Ⓑ Çağrı B",reqA,reqB)+
+      '<div class="plabel" style="margin-top:16px">RESPONSE</div>'+diffCols("Ⓐ Çağrı A","Ⓑ Çağrı B",resA,resB)+
+      '<div class="difflegend"><span><span style="color:var(--amber-bright)">■</span> Değişti — user-agent, device, expiresIn</span><span><span style="color:var(--green-bright)">■</span> Eklendi — refreshToken (B\'de yeni)</span></div>';
+    $("#diffscreen").classList.add("show")}
+  function closeDiffScreen(){$("#diffscreen").classList.remove("show")}
+  bindClick("#ds-close",closeDiffScreen);
   function ctxAction(act){var r=ctxRow||rows[0]||{m:"GET",h:"api.market.app",p:"/v1/users/me",s:200,resB:{ok:true}};
     if(act==="rule"){showView("rules");syncFlowbar("rules");prefillRule(r);showToast("✓ See → Kural oluşturuldu — alanlar otomatik dolduruldu")}
     else if(act==="bp"){showView("bp");syncFlowbar("bp");prefillBp(r);showToast("✓ See → Breakpoint eklendi: "+rPath(r))}
@@ -1003,7 +1042,8 @@ authorization: Bearer eyJhbGciOi…</textarea></div>
     else if(act==="flow")showToast("✓ Akışa eklendi");
     else if(act==="curl")showToast("✓ cURL panoya kopyalandı");
     else if(act==="save"){saveRow(r);showSub("saved");showToast("★ Kaydedildi → Kaydedilenler ("+savedItems.length+")")}
-    else if(act==="diff")showToast("⇄ Diff A olarak işaretlendi — ikinciye sağ tık → Diff B");
+    else if(act==="diffA"){diffA=r;showToast("Ⓐ Diff A işaretlendi — ikinci isteğe sağ tık → ‘Diff B’")}
+    else if(act==="diffB"){diffB=r;openDiffScreen()}
     else if(act==="focus")showToast("🎯 "+r.h+" → Kapsam (Focus) listesine eklendi")}
   $("#detail-x").addEventListener("click",closeDetail);
   $$("#dtabs span").forEach(function(s){s.addEventListener("click",function(){$$("#dtabs span").forEach(function(x){x.classList.remove("on")});s.classList.add("on");curDt=s.getAttribute("data-dt");renderDetail()})});
@@ -1033,6 +1073,52 @@ authorization: Bearer eyJhbGciOi…</textarea></div>
   bindClick("#snap-import",function(){showToast("⬆ Snapshot içe aktarıldı (snapshot.json)")});
   bindClick("#snap-export",function(){showToast("⬇ Snapshot dışa aktarıldı → snapshot.json")});
   bindClick("#snap-pdf",function(){showToast("📄 PDF indirildi → snapshot-raporu.pdf")});
+
+  /* 2 snapshot karşılaştırma — Android Login Flow ↔ iOS Login Flow (dashboard'a kadar) */
+  var CMP={
+    login:{m:"POST",p:"/api/auth/login",st:"diff",
+      req:{a:[{t:"x-platform: android",k:"chg"},{t:"user-agent: MarketApp/4.2 okhttp/4.12",k:"chg"},{t:'"device": "Pixel 8 · Android 14"',k:"chg"}],
+           b:[{t:"x-platform: ios",k:"chg"},{t:"user-agent: MarketApp/4.2 CFNetwork",k:"chg"},{t:'"device": "iPhone15,2 · iOS 17.4"',k:"chg"}]},
+      res:{a:[{t:'"pushProvider": "fcm",',k:"chg"},{t:'"token": "eyJhbGciOi…",'},{t:'"tier": "premium"'}],
+           b:[{t:'"pushProvider": "apns",',k:"chg"},{t:'"token": "eyJhbGciOi…",'},{t:'"tier": "premium"'}]}},
+    me:{m:"GET",p:"/v1/users/me",st:"same"},
+    config:{m:"GET",p:"/v1/config",st:"diff",
+      res:{a:[{t:'"flags": {'},{t:'  "newCheckout": true,'},{t:'  "androidWidget": true',k:"add"},{t:"}"}],
+           b:[{t:'"flags": {'},{t:'  "newCheckout": true,'},{t:'  "iosLiveActivity": true',k:"add"},{t:"}"}]}},
+    feed:{m:"GET",p:"/v1/feed?page=1",st:"same"},
+    telemetry:{m:"POST",p:"/telemetry/track",st:"onlyA"}
+  };
+  var CMP_ORDER=["login","me","config","feed","telemetry"],cmpSel="login";
+  var CMP_BADGE={same:["same","✓ aynı"],diff:["diff","⚠ farklı"],onlyA:["onlyA","Ⓐ sadece Android"],onlyB:["onlyB","Ⓑ sadece iOS"]};
+  function renderCmpList(){var el=$("#cmp-list");if(!el)return;
+    el.innerHTML=CMP_ORDER.map(function(k){var d=CMP[k];var b=CMP_BADGE[d.st];
+      return '<div class="cmprow'+(k===cmpSel?' sel':'')+'" data-k="'+k+'"><span class="method-tag" style="color:'+(METHOD_COLOR[d.m]||"#a1a1aa")+'">'+d.m+'</span><span class="cp">'+esc(d.p)+'</span><span class="cmpbadge '+b[0]+'">'+b[1]+'</span></div>'}).join("");
+    $$("#cmp-list .cmprow").forEach(function(row){row.addEventListener("click",function(){cmpSel=row.getAttribute("data-k");renderCmpList();renderCmpDetail()})})}
+  function renderCmpDetail(){var el=$("#cmp-detail");if(!el)return;var d=CMP[cmpSel];var html='';
+    if(d.st==="same")html='<div class="banner ok">✓ <b>'+d.m+' '+esc(d.p)+'</b> — Android ve iOS arasında request/response farkı yok.</div>';
+    else if(d.st==="onlyA")html='<div class="banner" style="border-left:3px solid var(--blue);background:var(--blue-bg);color:var(--blue-bright)">Ⓐ <b>'+d.m+' '+esc(d.p)+'</b> — yalnızca <b>Android</b> snapshot\'ında var. iOS bu telemetri çağrısını dashboard\'a kadar hiç yapmıyor.</div>';
+    else{html='<h4 style="margin:2px 0 10px;font-size:13px">'+d.m+' '+esc(d.p)+' — Android ↔ iOS farkı</h4>';
+      if(d.req)html+='<div class="plabel">REQUEST</div>'+diffCols("Ⓐ Android","Ⓑ iOS",d.req.a,d.req.b);
+      if(d.res)html+='<div class="plabel" style="margin-top:14px">RESPONSE</div>'+diffCols("Ⓐ Android","Ⓑ iOS",d.res.a,d.res.b);
+      html+='<div class="difflegend"><span><span style="color:var(--amber-bright)">■</span> değişti</span><span><span style="color:var(--green-bright)">■</span> platforma özel alan</span></div>'}
+    el.innerHTML=html}
+  renderCmpList();renderCmpDetail();
+
+  /* Remote — cURL içe aktarma (yapıştır → method/URL/header/body otomatik dolar) */
+  function importCurl(){
+    var t=($("#remote-curl-in")||{}).value||"";
+    var m=(t.match(/-X\s+(\w+)/)||[])[1]||((/(--data|-d\s)/.test(t))?"POST":"GET");
+    var url=(t.match(/curl\s+(?:-[A-Za-z-]+\s+)*['"]([^'"]+)['"]/)||t.match(/curl\s+(\S+)/)||[])[1]||"";
+    var headers=[],hre=/-H\s+['"]([^'"]+)['"]/g,mm;while((mm=hre.exec(t)))headers.push(mm[1]);
+    var bm=t.match(/--data(?:-raw)?\s+(['"])([\s\S]*?)\1/)||t.match(/-d\s+(['"])([\s\S]*?)\1/);var body=bm?bm[2]:"";
+    var line=$("#remote-line");if(line){var sel=line.querySelector("select"),inp=line.querySelector("input");
+      if(sel)sel.value=m.toUpperCase();if(inp&&url)inp.value=url;line.classList.add("flash");setTimeout(function(){line.classList.remove("flash")},1400)}
+    var tas=$$("#remote-main .field textarea");if(tas[0]&&headers.length)tas[0].value=headers.join("\n");if(tas[1]&&body)tas[1].value=body;
+    var box=$("#remote-curl");if(box)box.style.display="none";
+    showToast("⤓ cURL içe aktarıldı — method, URL, header, body dolduruldu")}
+  bindClick("#remote-curl-btn",function(){var el=$("#remote-curl");if(el)el.style.display=el.style.display==="none"?"":"none"});
+  bindClick("#remote-curl-do",importCurl);
+  bindClick("#remote-curl-cancel",function(){var el=$("#remote-curl");if(el)el.style.display="none"});
 
   /* Toggles */
   $("#sysproxy").addEventListener("click",function(){this.classList.toggle("on")});
@@ -1180,7 +1266,8 @@ authorization: Bearer eyJhbGciOi…</textarea></div>
       {sel:".ctxitem[data-act='rule']",title:"Kural / Breakpoint oluştur",body:"İlk iki aksiyon ilgili sekmeye geçer ve alanları o isteğin method/URL'siyle OTOMATİK doldurur — sıfırdan yazmazsın. ‘Remote'a Gönder’ ve ‘Format'ta Aç’ da aynı mantıkla çalışır.",keepCtx:true,pad:3},
       {sel:".ctxitem[data-act='save']",title:"Kaydet → kalıcı saklama",body:"‘Kaydet’ isteği Kaydedilenler'e kalıcı olarak saklar. Şimdi kaydedip sonucu görelim →",keepCtx:true,pad:3},
       {sel:".subtab[data-sub='saved']",title:"Kaydedilenler sekmesi",body:"İşte: kaydettiğin istek Kaydedilenler'e düştü, sayaç arttı. Bu liste kalıcıdır — uygulama kapanınca silinmez, dışa aktarıp ekiple paylaşabilirsin.",act:function(){ctxAction("save")},pad:4},
-      {sel:"#statusbar",title:"Durum çubuğu",body:"Toplam istek, eşleşen kural/breakpoint sayısı, aktif hedef cihaz ve CA güven durumu burada özetlenir.",act:function(){closePops();showSub("all")},pad:4}
+      {sel:"#diffscreen",title:"Diff ekranı (Set A / Set B)",body:"Sağ tıkta bir isteğe ‘Diff A’, başka birine ‘Diff B’ atayınca BU ekran açılır: iki isteğin request ve response farkı satır satır. Normalde gizlidir — yalnız A+B atanınca gelir.",act:function(){showSub("all");diffA=rows[0];diffB=rows[1]||rows[0];openDiffScreen()},pad:0},
+      {sel:"#statusbar",title:"Durum çubuğu",body:"Toplam istek, eşleşen kural/breakpoint sayısı, aktif hedef cihaz ve CA güven durumu burada özetlenir.",act:function(){closePops();closeDiffScreen();showSub("all")},pad:4}
     ]},
     "rules":{label:"Kurallar",setup:function(){closeModal();showView("rules")},wait:200,steps:[
       {sel:"#rules-new",title:"Yeni kural",body:"Map Local: eşleşen isteğe sunucuya hiç gitmeden kendi yazdığın yanıtı döndürürsün. Backend hazır olmadan UI geliştirmenin en hızlı yolu.",pad:4},
@@ -1199,10 +1286,11 @@ authorization: Bearer eyJhbGciOi…</textarea></div>
       {sel:"#ssl-modes",title:"Yakalama modu",body:"‘Tüm trafik’ her şeyi MITM eder. ‘Sadece şu domainler’ ise yalnız kendi API'ni yakalar, gerisini doğrudan geçirir — fiziksel cihazda PAC ile birlikte şarttır.",pad:4},
       {sel:"#ssl-include",title:"Odak listesi",body:"Yakalanacak domainleri ekle (örn. api.example.com). Listede olmayan her host doğrudan internete çıkar; Instagram, WhatsApp etkilenmez.",pad:4}
     ]},
-    "remote":{label:"Remote",setup:function(){closeModal();showView("remote")},wait:200,steps:[
+    "remote":{label:"Remote",setup:function(){closeModal();showView("remote");var b=$("#remote-curl");if(b)b.style.display="none"},wait:200,steps:[
       {sel:"#remote-line",title:"İstek oluştur",body:"Method, URL, header ve gövdeyi elle yazıp sunucuya istek gönder — yerleşik bir istek oluşturucu (Postman benzeri). Backend'i uygulama olmadan denemenin yolu.",pad:4},
-      {sel:".view[data-view='remote'] .pside-list",title:"Kayıtlı istekler",body:"Sık kullandığın istekleri kaydedip gruplara ayırabilirsin; tek tıkla geri yükle.",pad:4},
-      {sel:"#remote-send",title:"Gönder",body:"İsteği gönder; yanıt aşağıda durum kodu, süre ve gövdeyle görünür. ⌘↵ kısayolu da çalışır.",pad:4},
+      {sel:".view[data-view='remote'] .pside-list",title:"Kaydet & gruplama",body:"Sık kullandığın istekleri kaydedip GRUPLARA ayırırsın — Auth, Sepet, Ödeme… Tek tıkla geri yükle; endpoint koleksiyonunu düzenli tut (Postman koleksiyonu gibi).",pad:4},
+      {sel:"#remote-curl",title:"cURL içe aktar",body:"Terminalden veya tarayıcının ‘Copy as cURL’ özelliğinden kopyaladığın komutu yapıştır → method, URL, header ve body OTOMATİK ayrıştırılıp alanlara dolar. Hızlı tekrar/deneme için.",act:function(){var b=$("#remote-curl");if(b)b.style.display=""},pad:6},
+      {sel:"#remote-send",title:"Gönder",body:"İsteği gönder; yanıt aşağıda durum kodu, süre ve gövdeyle görünür. ⌘↵ kısayolu da çalışır.",act:function(){var b=$("#remote-curl");if(b)b.style.display="none"},pad:4},
       {sel:"#remote-resp",title:"Yanıt",body:"Dönen yanıtı JSON ağacı olarak incele. İpucu: See'de bir isteğe sağ tıklayıp ‘Remote'a Gönder’ dersen tüm alanlar buraya otomatik dolar.",pad:4}
     ]},
     "replay":{label:"Replay",setup:function(){closeModal();showView("replay");showRsub("mocks")},wait:200,steps:[
@@ -1211,8 +1299,9 @@ authorization: Bearer eyJhbGciOi…</textarea></div>
       {sel:"#replay-main .banner",title:"Etkinleştir",body:"Snapshot aktifken eşleşen istekler kayıttan yanıtlanır — çevrimdışı, deterministik test. Üstte yeşil ‘Mock Aktif’ rozeti görünür.",pad:4},
       {sel:"#snap-export",title:"Dışa / İçe Aktar (JSON)",body:"Snapshot'ı JSON olarak dışa aktarıp ekiple paylaş; ‘İçe Aktar’ ile geri yükle. Mock'lar repoya/PR'a taşınabilir.",act:function(){var b=$("#snap-export");if(b)b.click()},pad:4},
       {sel:"#snap-pdf",title:"PDF olarak indir",body:"Snapshot ve endpoint'lerini PDF rapor olarak indir — dokümantasyon veya paylaşım için.",act:function(){var b=$("#snap-pdf");if(b)b.click()},pad:4},
-      {sel:"#replay-subtabs .subtab[data-rsub='compare']",title:"Karşılaştır (Diff) sekmesi",body:"Şimdi Karşılaştır'a geçelim — aynı endpoint'in iki farklı yanıtını yan yana diff'leyen ekran.",act:function(){showRsub("compare")},pad:4},
-      {sel:".diffcols",title:"Aynı servisin farkları",body:"İki çağrı yan yana: değişen alanlar sarı, eklenenler yeşil, silinenler kırmızı vurgulanır. ‘API ne zaman / neyi değiştirdi?’ sorusunun yanıtı. See'de iki yanıta sağ tık → Diff A / Diff B ile de açılır.",pad:6}
+      {sel:"#replay-subtabs .subtab[data-rsub='compare']",title:"Karşılaştır (2 snapshot)",body:"Şimdi iki snapshot karşılaştırmasına geçelim — örn. Android ve iOS login akışı.",act:function(){showRsub("compare")},pad:4},
+      {sel:"#cmp-list",title:"İki snapshot, servis servis",body:"Üstten iki snapshot seç (Android Login ↔ iOS Login). Dashboard'a gelene kadar çağrılan servisler listelenir; her biri ‘aynı / farklı / sadece bir platformda’ olarak işaretlenir.",pad:4},
+      {sel:"#cmp-detail",title:"Request/response farkı",body:"Bir servise tıkla → o servisin iki snapshot arasındaki request ve response farkı satır satır renklenir. Header, push provider (FCM↔APNS), feature flag, eksik çağrı gibi platform tutarsızlıklarını yakalar.",pad:6}
     ]},
     "format":{label:"Format",setup:function(){closeModal();showView("format");fmtRun()},wait:200,steps:[
       {sel:"#fmt-in",title:"JSON girişi",body:"Herhangi bir JSON'u yapıştır — minified, kaçışlı, karışık. Nesne, dizi ve iç içe yapıları destekler.",pad:4},
