@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ProxyLab — Kurulum & Cihaz Bağlama Rehberi</title>
+<!--
+  ══════════════════════════════════════════════════════════════════════════
+  CONFLUENCE'A NASIL YÜKLENİR
+  1) Bu dosyayı tarayıcıda aç.  2) Cmd+A ile tümünü seç, Cmd+C ile kopyala.
+  3) Confluence'ta yeni sayfa aç, gövdeye Cmd+V ile yapıştır.
+     (Confluence başlık/liste/tablo/metni korur; süslü kutu stilleri sade metne döner.)
+  4) Her "📷 EKRAN GÖRÜNTÜSÜ: …" satırının yerine ilgili screenshot'ı sürükle-bırak.
+     Hangi ekranın geleceği o satırda yazıyor. Sıraya göre yerleştir.
+
+  GÜNCELLEME: İçerik düz HTML; başlıkları/adımları doğrudan düzenleyebilirsin.
+  Ekran görüntüleri uygulamanın İngilizce arayüzünden; doküman Türkçe.
+  ══════════════════════════════════════════════════════════════════════════
+-->
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:#1c1c20;line-height:1.65;max-width:900px;margin:0 auto;padding:32px 28px 80px;font-size:15px;background:#fff}
+  h1{font-size:30px;letter-spacing:-.02em;margin:0 0 4px}
+  h1 .sub{display:block;font-size:15px;font-weight:400;color:#71717a;letter-spacing:0;margin-top:6px}
+  h2{font-size:22px;margin:38px 0 10px;padding-top:14px;border-top:2px solid #ece9ff;color:#1c1c20}
+  h2 .num{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;
+    background:#7c7af7;color:#fff;font-size:16px;margin-right:10px;vertical-align:middle}
+  h3{font-size:17px;margin:22px 0 6px;color:#3a3a45}
+  p{margin:8px 0}
+  ol,ul{margin:8px 0 8px;padding-left:24px}
+  li{margin:7px 0}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f1f0f7;border:1px solid #e4e1f5;
+    border-radius:5px;padding:1px 6px;font-size:.88em;color:#5e5cc7}
+  table{border-collapse:collapse;width:100%;margin:12px 0;font-size:14px}
+  th,td{border:1px solid #e4e4e7;padding:8px 12px;text-align:left;vertical-align:top}
+  th{background:#f7f6fd;font-weight:700}
+  a{color:#5e5cc7}
+  /* görsel yuvası — Confluence'ta sade metne döner, "📷" satırı kalır */
+  .shot{border:2px dashed #a9a6f5;background:#f6f5ff;border-radius:10px;padding:16px 18px;margin:12px 0;
+    color:#5e5cc7;font-weight:600}
+  .shot small{display:block;color:#8a88a8;font-weight:400;margin-top:3px}
+  /* notlar — Confluence'ta blockquote/metne döner */
+  .note{border-left:4px solid #06b6d4;background:#ecfdff;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0}
+  .warn{border-left:4px solid #f59e0b;background:#fffbeb;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0}
+  .tip{border-left:4px solid #7c7af7;background:#f6f5ff;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0}
+  .note b,.warn b,.tip b{text-transform:uppercase;font-size:12px;letter-spacing:.04em}
+  .toc{background:#faf9ff;border:1px solid #ece9ff;border-radius:10px;padding:14px 22px;margin:18px 0}
+  .toc ol{margin:4px 0}
+  .lead{font-size:16px;color:#52525b}
+  hr{border:0;border-top:1px solid #ece9ff;margin:28px 0}
+  /* interaktif önizleme gömme kutusu (web'de iframe; Confluence'ta link'e döner) */
+  .live-demo{border:1px solid #ece9ff;border-radius:12px;overflow:hidden;margin:16px 0;
+    box-shadow:0 10px 30px -16px rgba(28,28,32,.35);background:#0d0d10}
+  .live-demo .bar{display:flex;align-items:center;gap:8px;padding:9px 14px;background:#15151a;
+    border-bottom:1px solid rgba(255,255,255,.07);color:#a1a1aa;font-size:12.5px;font-weight:600}
+  .live-demo .bar .tag{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:#0d0d10;background:#b9b8fb;border-radius:4px;padding:2px 7px}
+  .live-demo .bar a{margin-left:auto;color:#b9b8fb;font-weight:600;font-size:12px;text-decoration:none}
+  .live-demo iframe{display:block;width:100%;height:760px;border:0;background:#0d0d10}
+  .demo-note{font-size:13px;color:#71717a;margin:6px 2px 0}
+  /* sağ tık menüsü taklidi — uygulamadaki context menu'nün birebir görünümü.
+     Confluence'a yapışınca süslü kutu düşer, menü öğeleri sade liste/metne döner. */
+  .ctxwrap{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;margin:14px 0}
+  .ctxmenu{background:#1c1c22;border:1px solid #34343e;border-radius:12px;padding:6px;
+    min-width:248px;box-shadow:0 16px 40px -14px rgba(0,0,0,.6);font-size:13.5px}
+  .ctxmenu .ci{display:flex;align-items:center;gap:9px;padding:6px 10px;border-radius:7px;color:#e4e4ea;cursor:default}
+  .ctxmenu .ci:hover{background:#2a2a33}
+  .ctxmenu .ci .dot{width:7px;height:7px;border-radius:50%;background:var(--c,#a1a1aa);flex:none;box-shadow:0 0 6px -1px var(--c,#a1a1aa)}
+  .ctxmenu .ci .host{color:#9a9aa6;font-weight:600}
+  .ctxmenu .csep{height:1px;background:#34343e;margin:5px 6px}
+  .ctxmenu .ccolor{display:flex;align-items:center;gap:7px;padding:7px 10px;color:#9a9aa6;font-size:12.5px}
+  .ctxmenu .ccolor .sw{width:12px;height:12px;border-radius:50%;border:1px solid rgba(255,255,255,.15)}
+  .ctxcap{flex:1;min-width:230px;color:#52525b;font-size:13.5px}
+  .ctxcap b{color:#3a3a45}
+</style>
+</head>
+<body>
+
+<h1>ProxyLab — Kurulum &amp; Cihaz Bağlama Rehberi
+  <span class="sub">iPhone, Android ve simülatörden gelen HTTPS trafiğini yakalamak, değiştirmek ve tekrar oynatmak için adım adım kurulum. (Sürüm v1.1.0)</span>
+</h1>
+
+<p class="lead">Bu rehber; iOS Simulator, Android emülatör, fiziksel iPhone ve Android cihazların ProxyLab'e nasıl bağlanacağını ve HTTPS trafiğinin görünmesi için gereken sertifika (CA) kurulumunu kapsar.</p>
+
+<div class="note"><b>Bu satırlar hakkında</b> — “📷 EKRAN GÖRÜNTÜSÜ: …” ile başlayan kutuların yerine, kutuda tarif edilen ekran görüntüsünü ekleyin. Doküman Türkçe; uygulama görselleri İngilizce arayüzdendir.</div>
+
+<div class="toc">
+  <strong>İçindekiler</strong>
+  <ol>
+    <li>Genel bakış &amp; temel kavramlar</li>
+    <li>Adım 0 — CA sertifikasını bu Mac'e kurma (tüm akışların ön koşulu)</li>
+    <li>iOS Simulator bağlama</li>
+    <li>iPhone — fiziksel cihaz (Wi-Fi)</li>
+    <li>Android — emülatör / USB (adb)</li>
+    <li>Android — fiziksel cihaz (Wi-Fi)</li>
+    <li>System Proxy &amp; Kapsam (Focus) — önemli uyarılar</li>
+    <li>See — sağ tıklama menüsü (kural · breakpoint · Remote'a gönder)</li>
+    <li>Remote — İstek oluşturucu (request builder)</li>
+    <li>Sorun giderme</li>
+    <li>Klavye kısayolları</li>
+  </ol>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<h2><span class="num">1</span>Genel bakış &amp; temel kavramlar</h2>
+
+<p>ProxyLab, cihazınız ile internet arasında bir <strong>MITM (ortadaki adam) proxy</strong> olarak çalışır: 8888 portunda dinler, cihazın HTTPS trafiğini çözer ve ana ekranda listeler.</p>
+
+<div class="live-demo">
+  <div class="bar"><span class="tag">İnteraktif</span> ProxyLab — uygulamayı buradan deneyin
+    <a href="proxylab-preview.html" target="_blank">Tam ekran aç ↗</a>
+  </div>
+  <iframe src="proxylab-preview.html" title="ProxyLab interaktif önizleme" loading="lazy"></iframe>
+</div>
+<p class="demo-note">↑ Bu, gerçek uygulamanın <strong>See</strong> ekranının çalışan bir taklididir. <strong>🎯 Rehberli Tur</strong> ile adım adım gezin, <strong>▶ Otomatik Tur</strong> ile kendiliğinden oynayan demoyu izleyin veya <strong>Serbest gez</strong> ile satırlara tıklayıp detayları kendiniz inceleyin.</p>
+
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: ProxyLab ana ekranı (See sekmesi, boş liste)
+  <small>Confluence/PDF gibi iframe çalışmayan ortamlar için: yukarıdaki interaktif önizlemenin yerine bu statik ekran görüntüsünü ekleyin. Üstte sekmeler + System Proxy + Connect; ortada “Point your device at this Mac's proxy” kartları; altta “Listening on 10.x.x.x : 8888”.</small>
+</div>
+
+<h3>Bilmeniz gereken üç kavram</h3>
+<table>
+  <tr><th>Kavram</th><th>Ne işe yarar</th></tr>
+  <tr><td><strong>Capture (Live)</strong></td><td>Trafiğin anlık listelenmesi. Sağ üstteki “Live” göstergesi yeşilse trafik yakalanır.</td></tr>
+  <tr><td><strong>System Proxy</strong></td><td>Bu Mac'in tüm trafiğini (Safari, simülatör, native app) ProxyLab'e yönlendirir. Simülatör için gereklidir. <strong>Sadece bu Mac'i incelerken AÇIN</strong> (Bölüm 7).</td></tr>
+  <tr><td><strong>Kapsam (Scope/Focus)</strong></td><td>Yalnız seçtiğiniz domainleri yakala, gerisini doğrudan geçir. Pinning yapan uygulamaların kırılmasını ve listenin gürültüyle dolmasını önler.</td></tr>
+</table>
+
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: Connect menüsü açık (sağ üst “Connect” düğmesine tıklanmış)
+  <small>Menüde şunlar görünür: System Proxy (anahtar), Install CA for iOS Simulator, iPhone (Real Device), Android (Real Device), Android (USB / adb), Export CA.</small>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<h2><span class="num">2</span>Adım 0 — CA sertifikasını bu Mac'e kurma</h2>
+
+<p>HTTPS trafiğinin çözülebilmesi için ProxyLab'in kök sertifikasına (CA) <strong>hem bu Mac'in hem de hedef cihazın güvenmesi</strong> gerekir. Önce Mac:</p>
+
+<ol>
+  <li>Üst menüden <strong>Proxy → CA'yı Bu Bilgisayara Yükle</strong> (veya ana ekrandaki ilgili buton).</li>
+  <li>macOS bir <strong>parola diyalogu</strong> açar (güven ayarlarını değiştirmek için). Parolanızı girin.</li>
+  <li>Ana ekranın altında <strong>“✓ CA installed on this Mac”</strong> yeşil yazısını görün.</li>
+</ol>
+
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: macOS parola diyalogu (“… trust settings” için parola istiyor)</div>
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: Ana ekran altında yeşil “✓ CA installed on this Mac · next: install on your device”</div>
+
+<div class="note"><b>Not</b> — Bu adım Mac'in (ve Mac üstündeki Safari/simülatör'ün) güvenini sağlar. Fiziksel cihazlar için sertifika ayrıca cihaza da kurulur (aşağıdaki bölümler).</div>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<h2><span class="num">3</span>iOS Simulator bağlama</h2>
+
+<p>En hızlı yakalama yöntemi. Simülatör, Mac'in sistem proxy'sini kullanır.</p>
+
+<ol>
+  <li>Xcode ile bir <strong>iOS Simulator başlatın</strong> (Booted durumda olmalı).</li>
+  <li>ProxyLab'de sağ üst <strong>Connect → “Install CA for iOS Simulator”</strong>.</li>
+  <li>ProxyLab CA'yı çalışan simülatöre kurar ve simülatörü yeniden başlatır (güven önbelleği için).</li>
+  <li>Üst araç çubuğundan <strong>System Proxy'yi AÇIN</strong> (simülatör trafiği Mac proxy'sinden geçsin).</li>
+  <li>Simülatörde bir uygulama açın; istekler ProxyLab listesine düşmeye başlar.</li>
+</ol>
+
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: Connect menüsünde “Install CA for iOS Simulator” seçiliyken</div>
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: Kurulum sonrası onay (toast/bildirim: “CA installed on … simulator restarted”)</div>
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: System Proxy AÇIK (araç çubuğunda “System Proxy · ON · 127.0.0.1:8888”)</div>
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: Simülatör trafiği listede (See sekmesinde GET istekleri, 200)</div>
+
+<div class="warn"><b>Xcode 26 uyarısı</b> — Bazı Xcode 26 sürümlerinde <code>simctl add-root-cert</code> sessizce çalışmayabilir; CA simülatöre kurulmaz ve HTTPS handshake patlar (istek listede görünmez). Bu durumda CA'yı simülatörün TrustStore'una elle yazmak gerekir. Belirti: HTTPS isteklerinin hiç düşmemesi.</div>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<h2><span class="num">4</span>iPhone — fiziksel cihaz (Wi-Fi)</h2>
+
+<p>Cihaz ile Mac aynı Wi-Fi ağında olmalı. ProxyLab 4 adımlı bir rehber açar.</p>
+
+<ol>
+  <li>Sağ üst <strong>Connect → “iPhone (Real Device)”</strong>. Açılan <strong>iOS Kurulum Rehberi</strong> penceresini izleyin:</li>
+</ol>
+
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: “iOS Setup Guide” penceresi (4 adım: Mac'e CA, Wi-Fi proxy, sertifikayı indir, yükle &amp; güven)</div>
+
+<h3>Pencerede yer alan adımlar</h3>
+<ol>
+  <li><strong>Adım 1 — Root sertifikayı bu Mac'e yükle:</strong> kuruluysa yeşil “Installed &amp; Trusted”, değilse “Install to Mac” butonu.</li>
+  <li><strong>Adım 2 — Sertifikayı cihaza indir:</strong> iPhone'da <strong>Safari</strong> ile penceredeki adresi açın (veya QR'ı tarayın). Safari profili indirmek için izin ister. <em>(Bu adımı proxy'den ÖNCE yapın — cihaz henüz yönlendirilmediği için internet açıktır ve indirme sorunsuz olur.)</em></li>
+  <li><strong>Adım 3 — Yükle &amp; güven:</strong>
+    <ul>
+      <li><em>Ayarlar → Genel → VPN ve Aygıt Yönetimi → İndirilen Profil → ProxyLab CA → Yükle</em></li>
+      <li><em>Ayarlar → Genel → Hakkında → Sertifika Güveni Ayarları</em> → ProxyLab CA anahtarını <strong>açın</strong>.</li>
+    </ul>
+  </li>
+  <li><strong>Adım 4 — iPhone'da Wi-Fi proxy'sini Otomatik (PAC) ayarla (EN SON):</strong> <em>Ayarlar → Wi-Fi → (bağlı ağ ⓘ) → Proxy Yapılandır → <strong>Otomatik</strong></em>. <strong>URL</strong> alanına penceredeki <strong>Otomatik Proxy URL</strong>'ini girin (aşağıdaki tablo). Mac ve iPhone'daki <strong>tüm VPN'leri kapatın</strong>.
+    <table>
+      <tr><th>Alan</th><th>Değer</th></tr>
+      <tr><td>URL (PAC)</td><td>Penceredeki <strong>Otomatik Proxy URL</strong>'ini birebir kopyalayın — biçimi: <code>http://&lt;Mac-LAN-IP&gt;:8889/proxy.pac</code></td></tr>
+      <tr><td>Kimlik Doğrulama</td><td>Kapalı (No)</td></tr>
+    </table>
+    <div class="note"><b>IP'yi elle yazmayın</b> — <code>&lt;Mac-LAN-IP&gt;</code> Mac'inizin yerel ağ adresidir ve her ağda değişir. Doğru değer her zaman ProxyLab penceresinde yazılıdır; oradan kopyalayın.</div>
+    <div class="warn"><b>Neden en son?</b> — Proxy'yi sertifika kurulmadan açarsanız (Adım 2-3'ten önce) cihaz proxy'ye yönlenir ama CA güvenilmediğinden HTTPS kırılır → sertifikayı bile indiremezsiniz. Sırayı koruyun: önce indir + güven, sonra proxy.</div>
+    <div class="note"><b>Neden Otomatik?</b> — PAC sayesinde <strong>Kapsam (Focus)</strong> açıkken yalnız listenizdeki domain'ler ProxyLab'e girer; Instagram, WhatsApp gibi diğer tüm uygulamalar <strong>doğrudan internete</strong> çıkar ve etkilenmez. Manuel proxy'de ise TÜM trafik ProxyLab'den geçmek zorunda kalır ve pinned/QUIC kullanan uygulamalar kırılır.</div>
+  </li>
+  <li><strong>Adım 4b — (yalnızca Otomatik çalışmazsa) Manuel proxy:</strong> Nadiren bazı iOS sürümleri/kurumsal profiller PAC URL'ini kabul etmez (proxy hiç devreye girmez). Bu durumda aynı ekranda <em>Proxy Yapılandır → <strong>Manuel</strong></em> seçin ve penceredeki <strong>“Manuel proxy”</strong> bilgilerini girin:
+    <table>
+      <tr><th>Alan</th><th>Değer</th></tr>
+      <tr><td>Sunucu</td><td>Penceredeki <strong>Sunucu</strong> değeri — biçimi: <code>&lt;Mac-LAN-IP&gt;</code> (PAC'taki ile aynı IP)</td></tr>
+      <tr><td>Port</td><td><code>8888</code></td></tr>
+      <tr><td>Kimlik Doğrulama</td><td>Kapalı (No)</td></tr>
+    </table>
+    <div class="warn"><b>Manuel modun bedeli</b> — Bu modda Kapsam'dan (Focus) <strong>bağımsız olarak telefonun TÜM trafiği</strong> ProxyLab'den geçer; focus dışı ve cert pinning yapan uygulamalar (Instagram, WhatsApp, bankalar) kırılabilir. Sadece Otomatik gerçekten çalışmıyorsa kullanın ve işiniz bitince proxy'yi <strong>Kapalı</strong> yapın.</div>
+  </li>
+</ol>
+
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ (cihazdan): iPhone Ayarlar → Wi-Fi → Proxy Yapılandır → Otomatik (PAC URL girilmiş)</div>
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ (cihazdan): Safari'de CA indirme izni / “Profil İndirildi” bildirimi</div>
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ (cihazdan): Ayarlar → Profil yükleme ekranı (ProxyLab CA → Yükle)</div>
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ (cihazdan): Ayarlar → Hakkında → Sertifika Güveni Ayarları (ProxyLab CA açık)</div>
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: iPhone trafiği ProxyLab listesinde</div>
+
+<div class="note"><b>Not</b> — Fiziksel cihaz Wi-Fi proxy'sine yönlendirildiği için bu akışta <strong>System Proxy'yi açmanıza gerek yoktur</strong> (Bölüm 7).</div>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<h2><span class="num">5</span>Android — emülatör / USB (adb)</h2>
+
+<p>Otomatik akış: ProxyLab <code>adb</code> ile cihazı bulur, CA'yı yükler ve proxy'yi ayarlar. Aynı pencere hem Android <strong>emülatörü</strong> hem de <strong>USB ile bağlı fiziksel cihaz</strong> için çalışır — ikisi de <code>adb</code> üzerinden listelenir.</p>
+
+<h3>5a — Android emülatör (USB <u>gerekmez</u>)</h3>
+<p>Emülatör zaten bu Mac'in üstünde çalıştığı için <strong>kablo/USB bağlantısına gerek yoktur</strong>; <code>adb</code> emülatörü otomatik görür.</p>
+<ol>
+  <li>Android Studio'da bir <strong>emülatör (AVD) başlatın</strong> — açık ve önyüklenmiş olsun.</li>
+  <li>Sağ üst <strong>Connect → “Android (USB / adb)”</strong> (emülatör de bu listede çıkar). Açılan <strong>Android Setup</strong> penceresinde çalışan emülatör görünür.</li>
+  <li>Emülatörü seçip <strong>CA yükle</strong> + <strong>proxy ayarla</strong> aksiyonlarını çalıştırın — <code>adb</code> her ikisini otomatik yapar.</li>
+</ol>
+<div class="tip"><b>İpucu</b> — Emülatör görünmüyorsa: emülatörün tam önyüklenmesini bekleyin ve pencerede <strong>Yenile (Refresh)</strong>'e basın. USB takmaya çalışmayın; emülatör için gereksizdir.</div>
+
+<h3>5b — Fiziksel cihaz (USB kablo ile)</h3>
+<ol>
+  <li>Cihazda <strong>Geliştirici Seçenekleri → USB Hata Ayıklama</strong>'yı açın.</li>
+  <li>Cihazı <strong>USB kablo</strong> ile Mac'e bağlayın; telefonda çıkan <strong>“USB hata ayıklamaya izin ver?”</strong> sorusuna <strong>İzin Ver</strong> deyin.</li>
+  <li>Sağ üst <strong>Connect → “Android (USB / adb)”</strong> → pencerede cihazı seçin → <strong>CA yükle</strong> + <strong>proxy ayarla</strong>.</li>
+</ol>
+
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: Connect menüsünde “Android (USB / adb)” seçiliyken</div>
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: “Android Setup” penceresi — bağlı cihaz/emülatör listesi + “CA yükle” / “proxy ayarla” butonları</div>
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: Cihaz/emülatör bağlandıktan sonra Android trafiği listede</div>
+
+<div class="warn"><b>Android 7+ uyarısı</b> — Kullanıcı CA'sı yalnız buna izin veren uygulamalarda geçerlidir. Tüm uygulamalar için sistem deposuna kurulum gerekir (root + <code>adb</code>). Emülatörlerin çoğu (Google Play'siz “AOSP” imajları) root'a izin verdiği için sistem deposuna kurulum genelde emülatörde sorunsuzdur.</div>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<h2><span class="num">6</span>Android — fiziksel cihaz (Wi-Fi)</h2>
+
+<p>adb olmadan, aynı Wi-Fi üzerinden. Connect → <strong>“Android (Real Device)”</strong> 4 adımlı rehberi açar (iPhone akışına benzer).</p>
+
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: “Android Setup Guide” penceresi (4 adım)</div>
+
+<ol>
+  <li><strong>Adım 1:</strong> CA'yı bu Mac'e yükle (Bölüm 2).</li>
+  <li><strong>Adım 2 — Sertifikayı indir:</strong> Cihazda <strong>Chrome</strong> ile penceredeki adresi açın (veya QR). <code>ca.crt</code> dosyası iner. <em>(Proxy'den ÖNCE — internet açıkken indirin.)</em></li>
+  <li><strong>Adım 3 — Yükle &amp; güven:</strong> <em>Ayarlar → Güvenlik → Şifreleme ve kimlik bilgileri → Sertifika yükle → CA sertifikası</em> → inen <code>ca.crt</code>'yi seçin.</li>
+  <li><strong>Adım 4 — Android'de Wi-Fi proxy'sini Otomatik (PAC) ayarla (EN SON):</strong> <em>Ayarlar → Wi-Fi → (ağa basılı tut) → Ağı değiştir → Gelişmiş → Proxy → <strong>Proxy Otomatik Yapılandırma</strong></em>. <strong>PAC URL</strong> = penceredeki Otomatik Proxy URL — biçimi: <code>http://&lt;Mac-LAN-IP&gt;:8889/proxy.pac</code> (IP'yi elle yazmayın; penceredeki değeri kopyalayın). Böylece Kapsam (Focus) dışı uygulamalar doğrudan geçer. <em>Proxy'yi sertifika kurulmadan açarsanız HTTPS kırılır ve indirme yapamazsınız.</em></li>
+  <li><strong>Adım 4b — (yalnızca Otomatik çalışmazsa) Manuel proxy:</strong> Aynı ekranda <em>Proxy → <strong>Elle (Manual)</strong></em> seçin: <strong>Sunucu</strong> = penceredeki IP (<code>&lt;Mac-LAN-IP&gt;</code>), <strong>Port</strong> = <code>8888</code>. <span class="warn" style="display:inline">Bu modda Focus'tan bağımsız olarak telefonun TÜM trafiği proxy'den geçer; focus dışı / pinned uygulamalar kırılabilir.</span> İşiniz bitince proxy'yi kapatın.</li>
+</ol>
+
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ (cihazdan): Android Wi-Fi proxy ayarı (Proxy Otomatik Yapılandırma, PAC URL)</div>
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ (cihazdan): Chrome'da ca.crt indirme</div>
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ (cihazdan): Ayarlar → Güvenlik → CA sertifikası yükleme</div>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<h2><span class="num">7</span>System Proxy &amp; Kapsam (Focus) — önemli uyarılar</h2>
+
+<div class="warn"><b>En kritik nokta</b> — System Proxy AÇIK iken bu Mac'in <strong>tüm</strong> HTTPS trafiği ProxyLab'den geçer. <strong>Cert pinning</strong> yapan uygulamalar (Claude Desktop, bankalar, bazı Apple servisleri) ProxyLab'in sertifikasını reddeder → o uygulamalar “request fail” verir / bağlanamaz. Bu bir hata değil, MITM'in doğal sonucudur.</div>
+
+<h3>Doğru kullanım</h3>
+<ul>
+  <li><strong>Sadece iPhone/simülatör</strong> debug ediyorsanız: System Proxy gerekli (simülatör Mac proxy'sini kullanır) — ama <strong>Kapsam (Focus)</strong> ile yalnız kendi backend domain'inizi yakalayın; gerisi doğrudan geçer ve pinned uygulamalar çalışmaya devam eder.</li>
+  <li><strong>Sadece fiziksel iPhone Wi-Fi proxy</strong> ile bağlıysa: System Proxy'yi <strong>KAPALI</strong> bırakın (cihaz zaten yönlendirilmiştir).</li>
+</ul>
+
+<div class="warn"><b>Fiziksel cihazda Kapsam'ın çalışması için Otomatik (PAC) proxy şart</b> — Telefonu <strong>Manuel</strong> proxy ile kurarsanız (Sunucu/Port), telefonun TÜM trafiği Focus'tan bağımsız olarak ProxyLab'e gider; focus dışı Instagram/WhatsApp gibi uygulamalar kırılır (“sayfa yüklenmiyor”). Focus dışı trafiğin <strong>gerçekten doğrudan geçmesi</strong> için cihazı <strong>Proxy Yapılandır → Otomatik</strong> + penceredeki <strong>PAC URL</strong> ile kurun (Bölüm 4/6). PAC, focus dışı host'ları <code>DIRECT</code> yönlendirir → o uygulamalar ProxyLab'i hiç görmez.</div>
+
+<h3>Kapsam (Focus) nasıl ayarlanır</h3>
+<ol>
+  <li><strong>Change → Kapsam (Scope)</strong> sekmesine geçin.</li>
+  <li><strong>Focus</strong> moduna geçip yalnız kendi domain(ler)inizi ekleyin (örn. <code>api.example.com</code>).</li>
+</ol>
+
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: Change → Kapsam (Scope) sekmesi, Focus modu + domain listesi</div>
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: Araç çubuğunda System Proxy ON · 127.0.0.1:8888</div>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<h2><span class="num">8</span>See — sağ tıklama menüsü (kural · breakpoint · Remote'a gönder)</h2>
+
+<p>Trafiği yakaladıktan sonra işin çoğu <strong>See</strong> sekmesinde başlar. Listede <strong>herhangi bir isteğe sağ tıklayın</strong> (trackpad'de iki parmak / Ctrl+tık) — bağlam menüsü açılır. <strong>Kural oluşturma</strong> ve <strong>breakpoint ekleme</strong> gibi adımlar için ayrı sekmeye gitmenize gerek yok; doğrudan buradan, o isteğin verisi ön doldurulmuş halde yapabilirsiniz.</p>
+
+<div class="ctxwrap">
+  <div class="ctxmenu" aria-hidden="true">
+    <div class="ci"><span class="dot" style="--c:#fbbf24"></span>Kayıtlara Ekle</div>
+    <div class="csep"></div>
+    <div class="ci"><span class="dot" style="--c:#4ade80"></span>Bundan Kural Oluştur</div>
+    <div class="ci"><span class="dot" style="--c:#a78bfa"></span>Remote Map'e Ekle</div>
+    <div class="ci"><span class="dot" style="--c:#fbbf24"></span>Breakpoint Ekle</div>
+    <div class="csep"></div>
+    <div class="ci"><span class="dot" style="--c:#fb923c"></span>JSON Viewer'da Aç</div>
+    <div class="csep"></div>
+    <div class="ci"><span class="dot" style="--c:#60a5fa"></span>Diff A Olarak Ata</div>
+    <div class="ci"><span class="dot" style="--c:#60a5fa"></span>Diff B Olarak Ata</div>
+    <div class="csep"></div>
+    <div class="ccolor">Renk Etiketi
+      <span class="sw" style="background:#ef4444"></span>
+      <span class="sw" style="background:#f59e0b"></span>
+      <span class="sw" style="background:#22c55e"></span>
+      <span class="sw" style="background:#3b82f6"></span>
+      <span class="sw" style="background:#a855f7"></span>
+      · Temizle
+    </div>
+    <div class="csep"></div>
+    <div class="ci"><span class="dot" style="--c:#22d3ee"></span><span class="host">api.example.com</span> Sadece Bunu Yakala</div>
+    <div class="ci"><span class="dot" style="--c:#a78bfa"></span><span class="host">api.example.com</span> Bunu Hariç Tut</div>
+    <div class="ci"><span class="dot" style="--c:#a1a1aa"></span>URL Kopyala</div>
+    <div class="ci"><span class="dot" style="--c:#a1a1aa"></span>Request Body Kopyala</div>
+    <div class="ci"><span class="dot" style="--c:#a1a1aa"></span>Response Body Kopyala</div>
+  </div>
+  <div class="ctxcap">
+    <p style="margin-top:0"><b>↑ See'de bir isteğe sağ tıklayınca açılan menü.</b> Renkli nokta menünün uygulamadaki görünümüdür; her satır o isteğe uygulanır.</p>
+    <p>En çok kullanılan iki adım <b>doğrudan buradan</b> yapılır — ayrı sekmeye gitmeden, istek verisi otomatik dolu gelir.</p>
+  </div>
+</div>
+
+<h3>Menüdeki aksiyonlar</h3>
+<table>
+  <tr><th>Aksiyon</th><th>Ne yapar</th></tr>
+  <tr><td><strong>Kayıtlara Ekle</strong></td><td>İsteği <strong>Saved</strong> paneline kaydeder (sonra incelemek/paylaşmak için).</td></tr>
+  <tr><td><strong>Bundan Kural Oluştur</strong></td><td><strong>Kural (mock) kaydını See'den oluşturur.</strong> Satırın method/URL/header/body'si önceden doldurulmuş bir kural editörü açılır — <strong>Change → Yanıt Kuralı</strong> sekmesine elle gidip baştan yazmanıza gerek kalmaz. Kaydedince bu istek artık sizin verdiğiniz yanıtla döner.</td></tr>
+  <tr><td><strong>Remote Map'e Ekle</strong></td><td>İsteği (yakalanan cookie/Authorization dahil) <strong>Remote — İstek oluşturucuya</strong> taşır (Bölüm 9).</td></tr>
+  <tr><td><strong>Breakpoint Ekle</strong></td><td><strong>Breakpoint'i See'den ekler.</strong> O isteğin URL/host'una breakpoint tanımlanır; bir sonraki eşleşmede istek/yanıt <strong>uçuş sırasında durdurulur</strong> ve gönderilmeden önce düzenleyebilirsiniz. Breakpoints panelini ayrıca açıp kural yazmanıza gerek yok.</td></tr>
+  <tr><td><strong>JSON Viewer'da Aç</strong></td><td>Yanıt gövdesini <strong>Format</strong> sekmesindeki katlanabilir JSON görüntüleyicide açar.</td></tr>
+  <tr><td><strong>Diff A / Diff B Olarak Ata</strong></td><td>İki isteği karşılaştırmak için diff yuvalarına atar.</td></tr>
+  <tr><td><strong>Renk Etiketi / Temizle</strong></td><td>Satırı renkle işaretler (kalabalık listede gruplamak için) ya da etiketi kaldırır.</td></tr>
+  <tr><td><strong>Sadece Bunu Yakala / Bunu Hariç Tut</strong></td><td>İsteğin host'unu tek tıkla <strong>Kapsam (Focus)</strong> listesine ekler ya da hariç tutar (Bölüm 7).</td></tr>
+  <tr><td><strong>URL / Request Body / Response Body Kopyala</strong></td><td>İlgili veriyi (gövdeler güzelleştirilmiş JSON olarak) panoya kopyalar.</td></tr>
+</table>
+
+<div class="tip"><b>Özet</b> — <strong>Kural kaydetme</strong> ve <strong>breakpoint kaydetme</strong> sadece Change/Breakpoints sekmelerinden değil, <strong>See'de sağ tıklayarak da</strong> yapılır — ve bu yol daha hızlıdır çünkü istek verisi hazır gelir.</div>
+
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: See'de bir isteğe sağ tıklanmış, bağlam menüsü açık (yukarıdaki menünün gerçek hali)</div>
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: “Bundan Kural Oluştur” sonrası açılan, alanları dolu kural editörü</div>
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: “Breakpoint Ekle” sonrası istek uçuşta durdurulmuş (düzenleme ekranı)</div>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<h2><span class="num">9</span>Remote — İstek oluşturucu (request builder)</h2>
+
+<p><strong>Remote</strong> sekmesi bir <strong>istek oluşturucudur</strong>: bir HTTP isteğini elle kurup (method, URL, header, body) <strong>doğrudan gönderir</strong> ve yanıtı gösterir — Postman/Insomnia'nın ProxyLab içine gömülmüş hali gibi düşünün.</p>
+
+<h3>Tipik kullanım</h3>
+<ol>
+  <li><strong>See</strong>'de gerçek bir isteğe sağ tıklayın → <strong>“Remote Map'e Ekle”</strong>. İsteğin method, URL, header'ları (<strong>cookie ve Authorization dahil</strong>) ve body'si Remote'a taşınır.</li>
+  <li>Remote sekmesinde istediğiniz alanı düzenleyin — örn. body'deki bir alanı değiştirin, bir query parametresi ekleyin.</li>
+  <li><strong>Çalıştır (Run)</strong> ile gönderin (<code>⌘/Ctrl+Enter</code>); yanıt anında döner.</li>
+</ol>
+
+<p>Neden işe yarar: cihazda yakaladığınız <strong>gerçek oturum bilgisiyle (auth)</strong>, henüz uygulamaya eklenmemiş veya farklı parametreli bir uç noktayı <strong>cihaza dokunmadan</strong> deneyebilirsiniz.</p>
+
+<h3>Remote'da yapabilecekleriniz</h3>
+<table>
+  <tr><th>Özellik</th><th>Açıklama</th></tr>
+  <tr><td><strong>Method + URL</strong></td><td>GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS — URL alanıyla birlikte.</td></tr>
+  <tr><td><strong>Header editörü</strong></td><td>Cookie / Authorization korunur; Host, Content-Length, Connection gibi başlıklar otomatik yönetilir.</td></tr>
+  <tr><td><strong>Body editörü</strong></td><td>JSON güzelleştirme ile gövdeyi düzenleyin.</td></tr>
+  <tr><td><strong>cURL içe/dışa aktar</strong></td><td>Hazır bir <code>curl</code> komutunu içe aktarın ya da kurduğunuz isteği <code>curl</code> olarak panoya kopyalayın.</td></tr>
+  <tr><td><strong>Kaydet (Save)</strong></td><td>İsteği adlandırıp kaydedin; yan panelde gruplayıp tekrar tekrar kullanın.</td></tr>
+  <tr><td><strong>Çalıştır (Run)</strong></td><td><code>⌘/Ctrl+Enter</code> ile gönderir, yanıtı gösterir. <code>Esc</code> ile kapatır.</td></tr>
+</table>
+
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: Remote sekmesi — method/URL/header/body editörü + Run butonu</div>
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: See → sağ tık → “Remote Map'e Ekle” ile alanların dolu geldiği Remote ekranı</div>
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: Run sonrası dönen yanıt (status + body)</div>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<h2><span class="num">10</span>Sorun giderme</h2>
+
+<table>
+  <tr><th>Belirti</th><th>Olası neden &amp; çözüm</th></tr>
+  <tr><td>Simülatörde hiç istek düşmüyor</td><td>1) System Proxy açık mı? 2) CA <em>booted</em> simülatöre kuruldu mu? 3) Xcode 26'da <code>simctl add-root-cert</code> çalışmıyor olabilir → CA'yı TrustStore'a elle yaz. CA güvenli değilse HTTPS handshake patlar, istek görünmez.</td></tr>
+  <tr><td>Yeni uygulamalar (Claude vb.) “request fail”</td><td>System Proxy açık → pinned app'ler MITM'i reddediyor. System Proxy'yi kapatın ya da Focus moduna geçin (Bölüm 7).</td></tr>
+  <tr><td>System Proxy kapatınca internet kesiliyor</td><td>Eski bir loopback proxy kalıntısı geri yükleniyor olabilir. <em>Ayarlar → Ayarlarımı düzelt</em> ile temizleyin.</td></tr>
+  <tr><td>HTTPS yerine bağlantı hatası</td><td>İlgili domain cert pinning yapıyor olabilir → Kapsam'da “hariç tut”/Focus dışı bırakın.</td></tr>
+  <tr><td>Focus açık ama Instagram/WhatsApp vb. açılmıyor (fiziksel telefon)</td><td>Telefon <strong>Manuel</strong> proxy ile kurulmuş → focus dışı trafik de zorla ProxyLab'e gidiyor ve kırılıyor. Cihazı <strong>Proxy Yapılandır → Otomatik</strong> + penceredeki <strong>PAC URL</strong> ile yeniden kurun (Bölüm 4/6/7). Focus dışı uygulamalar <code>DIRECT</code> geçer ve normal çalışır.</td></tr>
+  <tr><td>Dahili logları görmek</td><td><code>⌘⇧L</code> ile Ağ Log panelini açın; başlıkta proxy'nin dinlediği adres ve TLS hataları görünür.</td></tr>
+</table>
+
+<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: Ağ Log paneli (⌘⇧L) — başlıkta “127.0.0.1:8888 · LAN …”</div>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<h2><span class="num">11</span>Klavye kısayolları</h2>
+
+<table>
+  <tr><th>Kısayol</th><th>İşlev</th></tr>
+  <tr><td><code>⌘1 / ⌘2 / ⌘3 / ⌘4</code></td><td>See / Change / Replay / Format sekmeleri (üst menü: View)</td></tr>
+  <tr><td><code>⌘K</code></td><td>Arama alanına odaklan</td></tr>
+  <tr><td><code>⌘F</code></td><td>Bul (üst menü: Edit)</td></tr>
+  <tr><td><code>⌘⇧L</code></td><td>Ağ Log panelini aç/kapat</td></tr>
+</table>
+
+<p style="margin-top:32px;color:#a1a1aa;font-size:13px">ProxyLab v1.1.0 · Kurulum &amp; Cihaz Bağlama Rehberi</p>
+
+</body>
+</html>

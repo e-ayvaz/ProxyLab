@@ -1,0 +1,1345 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="dark" />
+<title>ProxyLab — İnteraktif Önizleme</title>
+<!--
+  ══════════════════════════════════════════════════════════════════════════
+  PROXYLAB İNTERAKTİF ÖNİZLEME (mockup)
+  Gerçek uygulamanın taklididir. Backend yoktur; her şey tarayıcıda simüle edilir.
+  Sol panelden bir AKIŞ seçin:
+    • Arayüz Turları : See, Kurallar, Breakpoint'ler, SSL Proxying List,
+                       Replay, Format, Settings
+    • Cihaz Kurulumu: iOS Simulator, iPhone (Wi-Fi), Android (USB), Android (Wi-Fi)
+  Her akış kendi ekranını gösterir + hotspot/tooltip ile adım adım anlatır.
+  Ayrıca "Otomatik Tur" (video/GIF muadili) ve "Serbest gez" modları vardır.
+  Tek dosya, bağımsız çalışır. Ana rehbere iframe ile gömülür.
+  ══════════════════════════════════════════════════════════════════════════
+-->
+<style>
+  :root{
+    --bg-primary:#1d1d22; --bg-secondary:#26262d; --bg-tertiary:#2e2e36;
+    --bg-elevated:#37373f; --bg-input:#212127;
+    --border:rgba(255,255,255,.07); --border-strong:rgba(255,255,255,.12);
+    --text-primary:#f4f4f5; --text-secondary:#a1a1aa; --text-muted:#71717a; --text-faint:#52525b;
+    --accent:#7c7af7; --accent-hover:#8a88f9; --accent-text:#b9b8fb;
+    --accent-soft:rgba(124,122,247,.12); --accent-wash:rgba(124,122,247,.10); --accent-border:rgba(124,122,247,.30);
+    --cyan:#06b6d4; --cyan-bright:#22d3ee; --cyan-bg:rgba(6,182,212,.12); --cyan-border:rgba(6,182,212,.4);
+    --green:#22c55e; --green-bright:#4ade80; --green-bg:rgba(34,197,94,.10);
+    --amber:#f59e0b; --amber-bright:#fbbf24; --amber-bg:rgba(245,158,11,.10);
+    --red:#ef4444; --red-bright:#f87171; --red-bg:rgba(239,68,68,.10);
+    --blue:#3b82f6; --blue-bright:#60a5fa; --blue-bg:rgba(96,165,250,.12);
+    --orange:#f97316; --orange-bg:rgba(249,115,22,.12); --orange-bright:#fb923c;
+    --purple:#a78bfa; --purple-bg:rgba(167,139,250,.12);
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:var(--sans);background:#0d0d10;color:var(--text-primary);
+    font-size:13px;-webkit-font-smoothing:antialiased;overflow:hidden}
+  .wrap{height:100%;display:flex;flex-direction:column;overflow:hidden}
+
+  /* ───────── Demo kontrol şeridi (uygulamanın dışında, üstte) ───────── */
+  .demobar{display:flex;align-items:center;gap:10px;height:40px;flex-shrink:0;padding:0 14px;
+    background:#0d0d10;border-bottom:1px solid var(--border)}
+  .demobar .lbl{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;color:var(--text-secondary)}
+  .demobar .lbl b{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#0d0d10;
+    background:var(--accent-text);border-radius:4px;padding:2px 6px}
+  .demobar .grow{flex:1}
+  .mini{height:26px;padding:0 11px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;
+    border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text-secondary);
+    display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+  .mini:hover{background:rgba(255,255,255,.1);color:var(--text-primary)}
+  .mini.accent{background:var(--accent);border-color:var(--accent);color:#fff}
+  .mini.accent:hover{background:var(--accent-hover)}
+
+  /* ───────── Ana yerleşim: sol flow listesi + sahne ───────── */
+  .main{flex:1;display:flex;min-height:0;overflow:hidden}
+
+  /* Flow listesi (sol) */
+  .flowbar{width:212px;flex-shrink:0;background:#141418;border-right:1px solid var(--border);
+    display:flex;flex-direction:column;overflow-y:auto;transition:width .2s}
+  .flowbar.collapsed{width:50px}
+  .flowbar .fb-head{display:flex;align-items:center;gap:8px;padding:12px 14px 8px;color:var(--text-muted);
+    font-size:11px;font-weight:600}
+  .flowbar .fb-collapse{margin-left:auto;cursor:pointer;color:var(--text-faint);font-size:14px;
+    width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:5px}
+  .flowbar .fb-collapse:hover{background:rgba(255,255,255,.06);color:var(--text-primary)}
+  .fb-group{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-faint);
+    padding:14px 16px 6px}
+  .fb-item{display:flex;align-items:center;gap:10px;margin:1px 8px;padding:8px 10px;border-radius:7px;
+    cursor:pointer;color:var(--text-secondary);user-select:none;border:1px solid transparent}
+  .fb-item:hover{background:rgba(255,255,255,.04);color:var(--text-primary)}
+  .fb-item.active{background:var(--accent-soft);color:var(--accent-text);border-color:var(--accent-border)}
+  .fb-item .ic{width:20px;text-align:center;font-size:14px;flex-shrink:0}
+  .fb-item .tx{display:flex;flex-direction:column;min-width:0}
+  .fb-item .tx b{font-size:12.5px;font-weight:600;white-space:nowrap}
+  .fb-item .tx span{font-size:10.5px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .flowbar.collapsed .tx,.flowbar.collapsed .fb-group,.flowbar.collapsed .fb-head span{display:none}
+  .flowbar.collapsed .fb-item{justify-content:center;margin:1px 6px;padding:8px 0}
+  .fb-foot{margin-top:auto;padding:10px 14px;border-top:1px solid var(--border);font-size:10.5px;color:var(--text-faint)}
+  .flowbar.collapsed .fb-foot{display:none}
+
+  /* Sahne — gerçek uygulama penceresi */
+  .stage{flex:1;position:relative;min-width:0;overflow:hidden;background:var(--bg-primary)}
+  #app{position:absolute;inset:0;display:flex;flex-direction:column;min-width:560px;overflow:hidden}
+
+  /* Toolbar */
+  .toolbar{display:flex;align-items:center;height:52px;flex-shrink:0;
+    background:var(--bg-primary);border-bottom:1px solid var(--border);padding:0 14px;gap:8px}
+  .lights{display:flex;gap:8px;padding:0 8px 0 2px}
+  .lights span{width:12px;height:12px;border-radius:50%}
+  .lights .r{background:#ff5f57}.lights .y{background:#febc2e}.lights .g{background:#28c840}
+  .brand{display:flex;align-items:center;gap:8px;font-weight:700;letter-spacing:-.01em;font-size:14px;margin-right:6px;white-space:nowrap}
+  .brand .logo{width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,var(--accent),var(--cyan));
+    display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;box-shadow:0 6px 18px -10px rgba(124,122,247,.5)}
+  .tabs{display:flex;align-items:center;gap:2px;margin:0 auto;overflow-x:auto;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{display:flex;align-items:center;gap:6px;height:30px;padding:0 11px;border-radius:6px;
+    font-size:12.5px;color:var(--text-secondary);cursor:pointer;white-space:nowrap;flex-shrink:0;
+    border:1px solid transparent;transition:background .12s,color .12s;user-select:none}
+  .tab:hover{background:rgba(255,255,255,.04);color:var(--text-primary)}
+  .tab.active{background:var(--accent-soft);color:var(--accent-text);font-weight:600}
+  .tab .live{display:none;align-items:center;gap:4px;font-size:9px;font-weight:700;letter-spacing:.04em;color:var(--red-bright)}
+  .tab.active.is-live .live{display:inline-flex}
+  .tab .live i{width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulse 1.4s infinite}
+  .right{display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0}
+
+  .btn{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:5px;
+    font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid var(--border);
+    background:rgba(255,255,255,.04);color:var(--text-secondary);white-space:nowrap;
+    transition:background .12s,color .12s,border-color .12s;user-select:none}
+  .btn:hover{background:rgba(255,255,255,.08);color:var(--text-primary)}
+  .btn.accent{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.accent:hover{background:var(--accent-hover)}
+  .btn.green{background:var(--green);border-color:var(--green);color:#0d0d10}
+  .btn.sm{height:24px;padding:0 9px;font-size:11px}
+  .toggle{display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 10px;border-radius:5px;
+    font-size:11.5px;font-weight:600;color:var(--text-muted);border:1px solid var(--border);
+    background:rgba(255,255,255,.03);cursor:pointer;white-space:nowrap;user-select:none}
+  .toggle .sw{width:30px;height:17px;border-radius:999px;background:rgba(255,255,255,.12);position:relative;transition:background .15s}
+  .toggle .sw::after{content:"";position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:#fff;transition:transform .15s}
+  .toggle.on{color:var(--cyan-bright);border-color:var(--cyan-border)}
+  .toggle.on .sw{background:var(--cyan)}
+  .toggle.on .sw::after{transform:translateX(13px)}
+  .sw-mini{width:28px;height:16px;border-radius:999px;background:rgba(255,255,255,.14);position:relative;flex-shrink:0;cursor:pointer}
+  .sw-mini::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:transform .15s}
+  .sw-mini.on{background:var(--green)}
+  .sw-mini.on::after{transform:translateX(12px)}
+
+  /* SubTab strip (sadece See) */
+  .substrip{display:flex;align-items:center;justify-content:space-between;height:36px;flex-shrink:0;
+    background:var(--bg-primary);border-bottom:1px solid var(--border);padding:0 14px;gap:10px}
+  .substrip.hidden{display:none}
+  .subtabs{display:flex;align-items:center;gap:4px}
+  .subtab{display:flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:6px;font-size:11.5px;color:var(--text-secondary);cursor:pointer;user-select:none}
+  .subtab.active{background:var(--accent-soft);color:var(--accent-text);font-weight:600}
+  .subtab .cnt{font-size:10px;font-weight:700;background:rgba(255,255,255,.10);color:var(--text-secondary);border-radius:999px;padding:1px 6px;min-width:18px;text-align:center}
+  .subtab.active .cnt{background:transparent;color:var(--accent-text)}
+  .chips{display:flex;align-items:center;gap:6px}
+  .chip{display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 9px;border-radius:6px;font-size:11.5px;color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;user-select:none}
+  .chip:hover{background:rgba(255,255,255,.04)}
+  .chip.on{background:var(--cyan-bg);color:var(--cyan-bright);border-color:var(--cyan-border)}
+  .chip .cv{opacity:.6;font-size:9px}
+  .chipwrap{position:relative}
+  .pop{position:absolute;top:34px;right:0;z-index:35;width:280px;background:var(--bg-elevated);
+    border:1px solid var(--border-strong);border-radius:10px;box-shadow:0 18px 50px -16px rgba(0,0,0,.8);padding:10px;display:none}
+  .pop.show{display:block}
+  .pop h6{margin:0 0 8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint)}
+  .pop .pr{display:flex;align-items:center;gap:8px;padding:6px 4px;font-size:11.5px;color:var(--text-secondary)}
+  .pop .pr .mono{font-family:var(--mono);font-size:11px}
+  .pop .pr .x{margin-left:auto;cursor:pointer;opacity:.6}
+  .pop .plink{display:block;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:11px;color:var(--accent-text);cursor:pointer}
+  .pop .padd{display:flex;gap:6px;margin-top:8px}
+  .pop .padd input{flex:1;background:var(--bg-input);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text-primary);font-family:var(--mono);font-size:11px;outline:none}
+  .pop .ptoggle{display:flex;gap:6px;background:var(--bg-input);border-radius:7px;padding:3px;margin-bottom:8px}
+  .pop .ptoggle span{flex:1;text-align:center;font-size:10.5px;padding:5px;border-radius:5px;color:var(--text-muted);cursor:pointer}
+  .pop .ptoggle span.on{background:var(--cyan);color:#0d0d10;font-weight:600}
+  .empty-saved{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-muted);text-align:center;gap:8px;padding:40px}
+  .empty-saved .ic{font-size:30px;opacity:.5}
+  .empty-saved b{font-size:14px;color:var(--text-secondary);font-weight:600}
+  .empty-saved span{font-size:12px;max-width:340px;line-height:1.5}
+  /* Karşılaştır (Diff) — yan yana iki çağrı */
+  .diffcols{display:flex;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .diffcol{flex:1;background:var(--bg-secondary);min-width:0}
+  .diffcol .dh{padding:7px 12px;font-size:10.5px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);background:var(--bg-tertiary)}
+  .diffcol pre{margin:0;padding:10px 12px;font-family:var(--mono);font-size:11.5px;line-height:1.7;white-space:pre;color:var(--text-secondary);overflow-x:auto}
+  .diffcol .dk{color:var(--cyan-bright)}
+  .dl{display:block;margin:0 -12px;padding:0 12px}
+  .dl.add{background:rgba(34,197,94,.16);border-left:2px solid var(--green)}
+  .dl.del{background:rgba(239,68,68,.16);border-left:2px solid var(--red)}
+  .dl.chg{background:rgba(245,158,11,.16);border-left:2px solid var(--amber)}
+  .difflegend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:11px;color:var(--text-muted)}
+  .difflegend b{font-weight:400}
+
+  /* Body + views */
+  .body{flex:1;display:flex;min-height:0;position:relative}
+  .view{position:absolute;inset:0;display:none;flex-direction:column;min-height:0}
+  .view.show{display:flex}
+  .view.vrow{flex-direction:row}
+
+  /* See view (mevcut — KORUNDU) */
+  .list-col{flex:1;display:flex;flex-direction:column;min-width:0}
+  .lhead,.row{display:flex;align-items:center;height:28px;padding:0 14px}
+  .lhead{height:28px;position:sticky;top:0;z-index:2;background:var(--bg-primary);border-bottom:1px solid var(--border);
+    color:var(--text-faint);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+  .scroll{flex:1;overflow-y:auto;overflow-x:hidden}
+  .row{height:32px;border-bottom:1px solid var(--border);cursor:pointer;position:relative;font-size:11px}
+  .row:hover{background:rgba(255,255,255,.04)}
+  .row.sel{background:var(--accent-wash)}
+  .row .stripe{position:absolute;left:0;top:5px;bottom:5px;width:3px;border-radius:2px}
+  .c-method{width:62px;display:flex;align-items:center;gap:7px;flex-shrink:0;padding-left:8px}
+  .c-method .m{font-family:var(--mono);font-size:11px;font-weight:600}
+  .c-host{flex:1 1 0;min-width:84px;color:var(--text-secondary);font-family:var(--mono);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:10px}
+  .c-path{flex:2 1 0;min-width:0;color:var(--text-primary);font-family:var(--mono);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:10px}
+  .c-time,.c-size,.c-dur{width:62px;text-align:right;color:var(--text-muted);font-family:var(--mono);font-size:9.5px;flex-shrink:0}
+  .c-size{width:58px}.c-dur{width:60px}
+  .c-status{width:46px;text-align:right;flex-shrink:0;font-family:var(--mono);font-size:11px;font-weight:600}
+  .mock-badge{font-size:9px;font-weight:700;background:var(--accent-soft);color:var(--accent-text);border-radius:4px;padding:1px 6px;margin-left:2px}
+  .src{font-size:10px;opacity:.85}
+
+  /* Detail panel */
+  .detail{width:0;flex-shrink:0;display:flex;flex-direction:column;background:var(--bg-secondary);border-left:1px solid var(--border);overflow:hidden;transition:width .22s ease}
+  .detail.open{width:48%;max-width:600px}
+  .dhead{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+  .seg{display:flex;background:var(--bg-input);border-radius:6px;padding:2px;gap:2px}
+  .seg b{font-weight:600;font-size:11.5px;padding:4px 12px;border-radius:4px;color:var(--text-muted);cursor:pointer}
+  .seg b.on{background:var(--accent);color:#fff}
+  .dhead .dtabs{display:flex;gap:2px;margin-left:4px}
+  .dhead .dtabs span{font-size:11.5px;padding:4px 8px;border-radius:4px;color:var(--text-muted);cursor:pointer}
+  .dhead .dtabs span.on{color:var(--text-primary);background:rgba(255,255,255,.06)}
+  .dhead .x{margin-left:auto;color:var(--text-muted);cursor:pointer;font-size:18px;line-height:1;padding:2px 6px;border-radius:4px}
+  .dhead .x:hover{background:rgba(255,255,255,.06);color:var(--text-primary)}
+  .durl{padding:10px 14px;border-bottom:1px solid var(--border);background:var(--accent-wash);font-family:var(--mono);font-size:11px;color:var(--text-secondary);word-break:break-all;flex-shrink:0}
+  .durl .code{font-weight:700;margin-right:8px}
+  .dbody{flex:1;overflow:auto;padding:14px;font-family:var(--mono);font-size:12px;line-height:1.7}
+  .plabel{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint);margin-bottom:8px}
+  .htable{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11.5px}
+  .htable td{padding:3px 0;vertical-align:top}
+  .htable td:first-child{color:var(--cyan-bright);width:40%;padding-right:14px;white-space:nowrap}
+  .htable td:last-child{color:var(--text-secondary);word-break:break-all}
+  .json .k{color:var(--cyan-bright)}.json .s{color:var(--green-bright)}.json .n{color:var(--orange-bright)}.json .b{color:var(--amber-bright)}.json .p{color:var(--text-faint)}
+
+  /* ───────── Generic panel chrome (Change/Replay/Format/Settings views) ───────── */
+  .pane{display:flex;height:100%;min-height:0}
+  .pside{width:300px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;min-height:0}
+  .pside-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+  .pside-head h3{margin:0;font-size:13.5px;font-weight:600}
+  .pside-list{flex:1;overflow-y:auto;padding:8px}
+  .pmain{flex:1;min-width:0;display:flex;flex-direction:column;overflow-y:auto;padding:18px 22px}
+  .pmain.center{align-items:center;justify-content:center;text-align:center;color:var(--text-muted)}
+  .litem{padding:10px 12px;border-radius:8px;border:1px solid var(--border);margin-bottom:8px;cursor:pointer;position:relative;background:var(--bg-secondary)}
+  .litem:hover{background:var(--bg-tertiary)}
+  .litem.sel{border-color:var(--accent-border);background:var(--accent-wash)}
+  .litem.lstripe::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:2px;background:var(--green)}
+  .litem .lt{display:flex;align-items:center;gap:8px}
+  .litem .lt b{font-size:12.5px;font-weight:600}
+  .litem .lsub{font-size:10.5px;color:var(--text-muted);margin-top:3px;font-family:var(--mono)}
+  .pill{font-size:10px;font-weight:700;border-radius:4px;padding:1px 7px;font-family:var(--mono)}
+  .pill.g{background:var(--green-bg);color:var(--green-bright)}
+  .pill.r{background:var(--red-bg);color:var(--red-bright)}
+  .pill.c{background:var(--cyan-bg);color:var(--cyan-bright)}
+  .method-tag{font-family:var(--mono);font-size:11px;font-weight:700}
+  .sect{margin-bottom:22px;max-width:680px}
+  .sect h4{margin:0 0 4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px}
+  .sect .num{width:20px;height:20px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#0d0d10}
+  .sect p.d{margin:0 0 12px;font-size:11.5px;color:var(--text-muted);line-height:1.5}
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:5px}
+  .inp{width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:6px;padding:8px 10px;
+    color:var(--text-primary);font-family:var(--mono);font-size:12px;outline:none}
+  .inp:focus{border-color:var(--accent-border)}
+  textarea.inp{resize:none;line-height:1.6;min-height:120px}
+  .row-setting{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--border)}
+  .row-setting:last-child{border-bottom:0}
+  .row-setting .meta b{display:block;font-size:12.5px;font-weight:600}
+  .row-setting .meta span{display:block;font-size:11px;color:var(--text-muted);margin-top:3px;max-width:420px;line-height:1.45}
+  .seg2{display:inline-flex;background:var(--bg-input);border-radius:6px;padding:2px;gap:2px}
+  .seg2 span{font-size:11.5px;padding:5px 12px;border-radius:4px;color:var(--text-muted);cursor:pointer}
+  .seg2 span.on{background:var(--accent);color:#fff}
+  .modecards{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:640px;margin-bottom:18px}
+  .modecard{border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;background:var(--bg-secondary)}
+  .modecard.on{border-color:var(--cyan-border);background:var(--cyan-bg)}
+  .modecard .rk{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;margin-bottom:6px}
+  .modecard .rk .dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--text-faint)}
+  .modecard.on .rk .dot{border-color:var(--cyan);background:var(--cyan);box-shadow:inset 0 0 0 2px var(--bg-secondary)}
+  .modecard p{margin:0;font-size:11px;color:var(--text-muted);line-height:1.45}
+  .dchips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  .dchip{display:inline-flex;align-items:center;gap:7px;background:var(--cyan-bg);color:var(--cyan-bright);
+    border-radius:6px;padding:4px 10px;font-family:var(--mono);font-size:11.5px}
+  .dchip .x{cursor:pointer;opacity:.7;font-size:13px}
+  .banner{border-left:3px solid;border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:14px;font-size:11.5px;line-height:1.5}
+  .banner.info{border-color:var(--cyan);background:var(--cyan-bg);color:var(--cyan-bright)}
+  .banner.warn{border-color:var(--amber);background:var(--amber-bg);color:var(--amber-bright)}
+  .banner.ok{border-color:var(--green);background:var(--green-bg);color:var(--green-bright)}
+  .kbd{font-family:var(--mono);font-size:11px;background:var(--bg-input);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--text-secondary)}
+  .danger-box{border:1px solid var(--red-bg);background:rgba(239,68,68,.05);border-radius:10px;padding:16px;max-width:640px}
+
+  /* Status bar */
+  .statusbar{display:flex;align-items:center;height:28px;flex-shrink:0;background:var(--bg-primary);border-top:1px solid var(--border);padding:0 16px;gap:18px;font-size:9px;color:var(--text-muted)}
+  .statusbar .num{color:var(--text-primary);font-family:var(--mono)}
+  .statusbar .sep{color:var(--text-faint)}
+  .target{display:inline-flex;align-items:center;gap:7px;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;background:var(--blue-bg);color:var(--blue-bright)}
+  .target i{width:7px;height:7px;border-radius:50%;background:var(--green-bright);box-shadow:0 0 5px var(--green-bright);animation:pulse 1.4s infinite}
+  .sgrow{flex:1}
+  .ca-ok{display:inline-flex;align-items:center;gap:6px;color:var(--green-bright);font-size:10px;font-weight:600}
+  .ca-ok::before{content:"🛡";font-size:11px}
+
+  /* Hero (See boş durum) */
+  .hero{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;overflow-y:auto;padding:6vh 32px 28px;background:var(--bg-primary);z-index:3}
+  .hero.gone{display:none}
+  .hero .listen{display:inline-flex;align-items:center;gap:8px;font-size:11.5px;color:var(--text-secondary);border:1px solid var(--border);border-radius:999px;padding:5px 14px;margin-bottom:22px;background:rgba(255,255,255,.02)}
+  .hero .listen i{width:8px;height:8px;border-radius:50%;background:var(--green-bright);box-shadow:0 0 6px var(--green-bright);animation:pulse 1.6s infinite}
+  .hero h1{font-size:21px;line-height:1.3;font-weight:600;max-width:660px;text-align:center;margin:0 0 8px;letter-spacing:-.01em}
+  .hero p.sub{font-size:13px;line-height:1.55;color:var(--text-secondary);max-width:660px;text-align:center;margin:0 0 24px}
+  .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;width:100%;max-width:960px;margin-bottom:24px}
+  .card{background:var(--bg-tertiary);border:1px solid var(--border);border-radius:12px;padding:15px 17px}
+  .card h4{margin:0 0 11px;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+  .card.see h4{color:var(--green-bright)}.card.connect h4{color:var(--cyan-bright)}.card.change h4{color:var(--amber-bright)}.card.replay h4{color:var(--accent-text)}
+  .card .ln{margin-bottom:9px}.card .ln:last-child{margin-bottom:0}
+  .card .ln b{display:block;font-size:11.5px;font-weight:600;margin-bottom:2px}
+  .card.see .ln b{color:var(--green-bright)}.card.connect .ln b{color:var(--cyan-bright)}.card.change .ln b{color:var(--amber-bright)}.card.replay .ln b{color:var(--accent-text)}
+  .card .ln span{font-size:11px;color:var(--text-secondary);line-height:1.4}
+
+  /* ───────── Modal katmanı (cihaz kurulum) ───────── */
+  .modal-layer{position:absolute;inset:0;z-index:34;display:none;align-items:flex-start;justify-content:center;
+    background:rgba(7,7,10,.55);overflow-y:auto;padding:40px 20px}
+  .modal-layer.show{display:flex}
+  .modal{width:520px;max-width:100%;background:var(--bg-secondary);border:1px solid var(--border-strong);
+    border-radius:14px;box-shadow:0 20px 60px -20px rgba(0,0,0,.85);overflow:hidden}
+  .modal-h{display:flex;align-items:flex-start;gap:10px;padding:16px 18px 12px;border-bottom:1px solid var(--border)}
+  .modal-h .tt{flex:1}
+  .modal-h h3{margin:0;font-size:16px;font-weight:600}
+  .modal-h p{margin:4px 0 0;font-size:12px;color:var(--text-muted);line-height:1.45}
+  .modal-h .x{cursor:pointer;color:var(--text-muted);font-size:20px;line-height:1;padding:2px 6px;border-radius:5px}
+  .modal-h .x:hover{background:rgba(255,255,255,.06);color:var(--text-primary)}
+  .modal-b{padding:16px 18px;max-height:60vh;overflow-y:auto}
+  .modal-f{display:flex;gap:10px;padding:12px 18px;border-top:1px solid var(--border);justify-content:flex-end}
+  .step{display:flex;gap:12px;margin-bottom:16px}
+  .step .sb{width:26px;height:26px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:700;color:#fff;background:var(--accent)}
+  .step.done .sb{background:var(--green);color:#0d0d10}
+  .step .sc{flex:1;min-width:0}
+  .step .sc b{display:block;font-size:13px;font-weight:600;margin-bottom:4px}
+  .step .sc .sd{font-size:11.5px;color:var(--text-secondary);line-height:1.5}
+  .step .sc .path{font-family:var(--mono);font-size:11px;color:var(--text-secondary);background:var(--bg-input);
+    border:1px solid var(--border);border-radius:6px;padding:6px 9px;margin-top:7px;word-break:break-all}
+  .urlbox{display:flex;align-items:center;gap:8px;background:var(--bg-input);border:1px solid var(--border);
+    border-radius:6px;padding:7px 10px;margin-top:8px;font-family:var(--mono);font-size:11px;color:var(--cyan-bright)}
+  .urlbox .cp{margin-left:auto;cursor:pointer;color:var(--text-muted);font-size:11px;font-weight:600;flex-shrink:0}
+  .qr{width:128px;height:128px;margin-top:10px;border-radius:8px;background:#fff;padding:8px}
+  .qr svg{display:block;width:100%;height:100%}
+  .devcard{display:flex;align-items:center;gap:12px;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;background:var(--bg-tertiary)}
+  .devcard .di{flex:1;min-width:0}
+  .devcard .di b{font-size:13px;font-weight:600}
+  .devcard .di .id{font-family:var(--mono);font-size:10.5px;color:var(--text-muted);margin-top:2px}
+  .badge-em{font-size:8.5px;font-weight:700;letter-spacing:.05em;border-radius:4px;padding:2px 6px;margin-right:7px}
+  .badge-em.em{background:var(--purple-bg);color:var(--purple)}
+  .badge-em.dv{background:var(--blue-bg);color:var(--blue-bright)}
+  .conmenu{position:absolute;top:50px;right:14px;width:300px;z-index:36;background:var(--bg-elevated);
+    border:1px solid var(--border-strong);border-radius:12px;box-shadow:0 20px 60px -20px rgba(0,0,0,.85);
+    padding:6px;display:none}
+  .conmenu.show{display:block}
+  .conmenu .sec{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-faint);padding:8px 10px 4px}
+  .conitem{display:flex;align-items:flex-start;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer}
+  .conitem:hover{background:rgba(255,255,255,.05)}
+  .conitem .ci{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+  .conitem .cc b{display:block;font-size:12.5px;font-weight:600}
+  .conitem .cc span{display:block;font-size:10.5px;color:var(--text-muted);line-height:1.4;margin-top:1px}
+
+  /* Sağ tık (context) menüsü */
+  .ctxmenu{position:absolute;z-index:38;min-width:236px;background:var(--bg-elevated);border:1px solid var(--border-strong);
+    border-radius:10px;box-shadow:0 18px 50px -16px rgba(0,0,0,.8);padding:5px;display:none}
+  .ctxmenu.show{display:block}
+  .ctxitem{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:6px;font-size:12.5px;cursor:pointer;color:var(--text-secondary)}
+  .ctxitem:hover{background:rgba(255,255,255,.06);color:var(--text-primary)}
+  .ctxitem.accent:hover{background:var(--accent-soft);color:var(--accent-text)}
+  .ctxitem .ci{width:17px;text-align:center;opacity:.85;flex-shrink:0}
+  .ctxitem .kb{margin-left:auto;font-size:10px;color:var(--text-faint);font-family:var(--mono)}
+  .ctxsep{height:1px;background:var(--border);margin:4px 6px}
+  .flash{outline:2px solid var(--accent);outline-offset:-2px;animation:flashpulse 1.4s ease}
+  @keyframes flashpulse{0%{background:var(--accent-soft)}100%{background:transparent}}
+  .toastmsg{position:absolute;bottom:42px;left:50%;transform:translateX(-50%);z-index:37;background:var(--green);
+    color:#0d0d10;font-size:12.5px;font-weight:600;padding:9px 16px;border-radius:8px;box-shadow:0 12px 30px -10px rgba(0,0,0,.6);
+    opacity:0;transition:opacity .2s,transform .2s;pointer-events:none}
+  .toastmsg.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+
+  /* Telefon ekranı taklidi (cihaz kurulum manuel adımları) */
+  .phones{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px}
+  .phone{width:208px;background:#000;border-radius:28px;padding:7px;border:1px solid #2a2a30;box-shadow:0 12px 34px -14px rgba(0,0,0,.8);flex-shrink:0}
+  .phone .scr{background:#f2f2f7;border-radius:22px;overflow:hidden;color:#1c1c1e;font-size:11px;min-height:230px}
+  .phone.dark .scr{background:#000;color:#f2f2f7}
+  .phbar{display:flex;align-items:center;justify-content:space-between;padding:7px 14px 2px;font-size:9.5px;font-weight:600;color:#1c1c1e}
+  .phone.dark .phbar{color:#fff}
+  .phnav{display:flex;align-items:center;gap:4px;padding:4px 10px 6px;font-size:11.5px;color:#007aff}
+  .phone.android .phnav{color:#3ddc84}
+  .phttl{padding:0 14px 8px;font-size:15px;font-weight:700;color:#1c1c1e}
+  .phone.dark .phttl{color:#fff}
+  .phgrp{font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:#8e8e93;padding:6px 14px 4px}
+  .phr{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff;padding:9px 14px;border-bottom:1px solid #e5e5ea;font-size:11.5px;color:#1c1c1e}
+  .phone.dark .phr{background:#1c1c1e;border-color:#2a2a2c;color:#f2f2f7}
+  .phr:last-child{border-bottom:0}
+  .phr .v{color:#8e8e93;font-family:var(--mono);font-size:10px;display:flex;align-items:center;gap:5px}
+  .phr.sel .v{color:#007aff}
+  .phr .chk{color:#007aff;font-weight:700;font-size:13px}
+  .phone.android .phr.sel .v,.phone.android .phr .chk{color:#3ddc84}
+  .phtog{width:30px;height:18px;border-radius:999px;background:#34c759;position:relative;flex-shrink:0}
+  .phtog::after{content:"";position:absolute;top:2px;left:14px;width:14px;height:14px;border-radius:50%;background:#fff}
+  .phseg{display:flex;background:#e5e5ea;border-radius:8px;margin:10px 14px;padding:2px}
+  .phone.dark .phseg{background:#2c2c2e}
+  .phseg span{flex:1;text-align:center;font-size:10.5px;padding:5px 2px;border-radius:6px;color:#1c1c1e}
+  .phone.dark .phseg span{color:#f2f2f7}
+  .phseg span.on{background:#fff;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.18);color:#1c1c1e}
+  .phfield{margin:8px 14px;background:#fff;border:1px solid #e5e5ea;border-radius:8px;padding:8px 10px;font-family:var(--mono);font-size:10px;color:#1c1c1e;word-break:break-all}
+  .phone.dark .phfield{background:#1c1c1e;border-color:#2a2a2c;color:#f2f2f7}
+  .phfield .lbl{font-family:var(--sans);font-size:9px;color:#8e8e93;margin-bottom:3px}
+  .phcap{font-size:10px;color:var(--text-muted);text-align:center;margin:7px 0 0;max-width:208px;line-height:1.4}
+
+  /* ───────── Rehberli tur ───────── */
+  #scrim{position:absolute;inset:0;z-index:40;display:none;pointer-events:none}
+  #scrim.show{display:block}
+  #scrim .veil{position:absolute;inset:0;background:rgba(7,7,10,.62);pointer-events:auto;transition:clip-path .3s}
+  .spot{position:absolute;border:2px solid var(--accent);border-radius:8px;box-shadow:0 0 0 4px rgba(124,122,247,.25),0 0 40px rgba(124,122,247,.45);pointer-events:none;transition:all .3s cubic-bezier(.4,0,.2,1);z-index:42}
+  .tip{position:absolute;z-index:43;max-width:300px;background:var(--bg-elevated);border:1px solid var(--accent-border);border-radius:12px;padding:14px 16px;box-shadow:0 20px 60px -20px rgba(0,0,0,.85);pointer-events:auto;transition:all .3s cubic-bezier(.4,0,.2,1)}
+  .tip .step-l{font-size:10px;font-weight:700;letter-spacing:.05em;color:var(--accent-text);text-transform:uppercase;margin-bottom:6px}
+  .tip h5{margin:0 0 6px;font-size:14px;font-weight:600}
+  .tip p{margin:0 0 12px;font-size:12.5px;line-height:1.5;color:var(--text-secondary)}
+  .tip .nav{display:flex;align-items:center;gap:8px}
+  .tip .nav .prog{margin-left:auto;font-size:10.5px;color:var(--text-muted);font-family:var(--mono)}
+  .tbtn{height:30px;padding:0 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text-secondary);font-family:inherit}
+  .tbtn:hover{background:rgba(255,255,255,.1);color:var(--text-primary)}
+  .tbtn.accent{background:var(--accent);border-color:var(--accent);color:#fff}
+  .tbtn.accent:hover{background:var(--accent-hover)}
+
+  /* Launch + auto */
+  #launch{position:absolute;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(13,13,16,.86);backdrop-filter:blur(6px);gap:16px;text-align:center;padding:24px}
+  #launch.gone{display:none}
+  #launch .logo{width:60px;height:60px;border-radius:18px;background:linear-gradient(135deg,var(--accent),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 12px 40px -12px rgba(124,122,247,.6)}
+  #launch h2{margin:0;font-size:23px;letter-spacing:-.02em}
+  #launch p{margin:0;max-width:460px;color:var(--text-secondary);font-size:13.5px;line-height:1.55}
+  #launch .actions{display:flex;gap:12px;margin-top:4px;flex-wrap:wrap;justify-content:center}
+  #launch .big{height:42px;padding:0 20px;font-size:13.5px;border-radius:10px}
+  #launch .hint{font-size:12px;color:var(--text-faint);margin-top:2px}
+  .auto-pill{display:none;position:absolute;bottom:42px;left:50%;transform:translateX(-50%);z-index:44;background:var(--bg-elevated);border:1px solid var(--accent-border);border-radius:999px;padding:8px 16px;font-size:12px;color:var(--text-secondary);box-shadow:0 12px 40px -12px rgba(0,0,0,.7);align-items:center;gap:10px}
+  .auto-pill.show{display:inline-flex}
+  .auto-pill i{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 1.2s infinite}
+
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  @keyframes rowin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+  .row.new{animation:rowin .25s ease}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ───────── Demo kontrol şeridi ───────── -->
+  <div class="demobar">
+    <span class="lbl"><b>Önizleme</b> ProxyLab arayüzünün canlı taklidi</span>
+    <span class="grow"></span>
+    <div class="mini" id="restart">↻ Baştan</div>
+    <div class="mini" id="auto-toggle">▶ Otomatik Tur</div>
+    <div class="mini accent" id="tour-toggle">🎯 Bu ekranı anlat</div>
+  </div>
+
+  <div class="main">
+
+    <!-- ───────── Sol: Akış listesi ───────── -->
+    <div class="flowbar" id="flowbar">
+      <div class="fb-head"><span>Akışlar</span><span class="fb-collapse" id="fb-collapse" title="Daralt">⟨</span></div>
+      <div class="fb-group">Arayüz Turları</div>
+      <div id="ui-flows"></div>
+      <div class="fb-group">Cihaz Kurulumu</div>
+      <div id="dev-flows"></div>
+      <div class="fb-foot">Bir akış seç → ekran + adım adım anlatım açılır.</div>
+    </div>
+
+    <!-- ───────── Sahne: gerçek uygulama ───────── -->
+    <div class="stage" id="stage">
+      <div id="app">
+
+        <!-- Toolbar -->
+        <div class="toolbar" id="toolbar">
+          <div class="lights"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+          <div class="brand"><span class="logo">◆</span>ProxyLab</div>
+          <div class="tabs" id="tabs">
+            <div class="tab active is-live" data-tab="see">👁 See <span class="live"><i></i>LIVE</span></div>
+            <div class="tab" data-tab="rules">⊟ Kurallar</div>
+            <div class="tab" data-tab="bp">⏸ Breakpoint'ler</div>
+            <div class="tab" data-tab="ssl">🔒 SSL Proxying List</div>
+            <div class="tab" data-tab="remote">⇅ Remote</div>
+            <div class="tab" data-tab="replay">↺ Replay</div>
+            <div class="tab" data-tab="format">{ } Format</div>
+            <div class="tab" data-tab="settings">⚙ Settings</div>
+          </div>
+          <div class="right">
+            <div class="toggle" id="sysproxy"><span class="sw"></span>System Proxy</div>
+            <div class="btn" id="connect">🔌 Connect ▾</div>
+          </div>
+        </div>
+
+        <!-- SubTab strip (sadece See) -->
+        <div class="substrip" id="substrip">
+          <div class="subtabs">
+            <div class="subtab active" data-sub="all">Tüm İstekler <span class="cnt" id="cnt-all">0</span></div>
+            <div class="subtab" data-sub="saved">Kaydedilenler <span class="cnt" id="cnt-saved">0</span></div>
+          </div>
+          <div class="chips" id="chips">
+            <div class="chipwrap">
+              <div class="chip" id="chip-domain">Domain Filtresi <span class="cv">▾</span></div>
+              <div class="pop" id="pop-domain">
+                <div class="ptoggle"><span>Tüm trafik</span><span class="on">Sadece şu domainler</span></div>
+                <h6>Odak listesi</h6>
+                <div class="pr"><span class="mono">api.market.app</span><span class="x">×</span></div>
+                <div class="pr"><span class="mono">cdn.market.app</span><span class="x">×</span></div>
+                <div class="padd"><input placeholder="api.example.com"><div class="btn accent sm">Ekle</div></div>
+                <div class="plink" data-goto="ssl">SSL Proxying List'i aç →</div>
+              </div>
+            </div>
+            <div class="chipwrap">
+              <div class="chip" id="chip-map">Map <span class="cv">▾</span></div>
+              <div class="pop" id="pop-map">
+                <h6>Yanıt Kuralları (Map Local)</h6>
+                <div class="pr"><span class="sw-mini on"></span>Login her zaman başarılı</div>
+                <div class="pr"><span class="sw-mini on"></span>Boş feed (test)</div>
+                <div class="pr"><span class="sw-mini"></span>Ödeme hatası simülasyonu</div>
+                <div class="plink" data-goto="rules">Kurallar panelini aç →</div>
+              </div>
+            </div>
+            <div class="chipwrap">
+              <div class="chip" id="chip-bp">Breakpoint'ler <span class="cv">▾</span></div>
+              <div class="pop" id="pop-bp">
+                <h6>Breakpoint'ler</h6>
+                <div class="pr"><span class="sw-mini on"></span>Login'i durdur</div>
+                <div class="pr"><span class="sw-mini"></span>Sepet güncelleme</div>
+                <div class="plink" data-goto="bp">Breakpoint panelini aç →</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Body: views -->
+        <div class="body">
+
+          <!-- ===== SEE VIEW ===== -->
+          <div class="view show" data-view="see">
+            <div class="list-col">
+              <div class="lhead">
+                <div class="c-method" style="padding-left:0">METHOD</div>
+                <div class="c-host">HOST</div><div class="c-path">PATH</div>
+                <div class="c-time">ZAMAN</div><div class="c-size">BOYUT</div><div class="c-dur">SÜRE</div><div class="c-status">STATUS</div>
+              </div>
+              <div class="scroll" id="scroll"></div>
+              <div class="scroll" id="saved-scroll" style="display:none">
+                <div class="empty-saved" id="saved-empty"><div class="ic">★</div><b>Henüz kayıt yok</b><span>Bir isteğe sağ tıklayıp <b>Kaydet</b> dersen burada saklanır — uygulama kapanınca silinmez, ekiple paylaşabilirsin.</span></div>
+              </div>
+            </div>
+            <div class="detail" id="detail">
+              <div class="dhead">
+                <div class="seg"><b class="on" data-phase="req">Request</b><b data-phase="res">Response</b></div>
+                <div class="dtabs" id="dtabs"><span class="on" data-dt="body">Body</span><span data-dt="headers">Headers</span><span data-dt="raw">Raw</span></div>
+                <div class="x" id="detail-x">×</div>
+              </div>
+              <div class="durl" id="durl"></div>
+              <div class="dbody" id="dbody"></div>
+            </div>
+            <div class="hero" id="hero">
+              <div class="listen"><i></i>Dinleniyor — 192.168.1.50 : 8888 · PAC: 8889 <span style="color:var(--text-faint)">(örnek IP — sizde farklı olur)</span></div>
+              <h1>iPhone, Android veya simülatörden gelen HTTPS trafiğini görün, değiştirin ve tekrar oynatın.</h1>
+              <p class="sub">ProxyLab cihazınız ile internet arasında proxy olarak çalışır — başlatın, cihazınızı buraya yönlendirin, tüm API çağrıları burada görünür.</p>
+              <div class="cards">
+                <div class="card see"><h4>See</h4>
+                  <div class="ln"><b>Canlı</b><span>Cihazdan gelen tüm API çağrıları anlık listelenir.</span></div>
+                  <div class="ln"><b>İncele</b><span>Satıra tıkla → request, response, header ve body.</span></div>
+                  <div class="ln"><b>Karşılaştır</b><span>Sağ tık → iki yanıtı yan yana diff'le.</span></div>
+                </div>
+                <div class="card connect"><h4>Connect</h4>
+                  <div class="ln"><b>iOS Simulator</b><span>Simulator açıkken Connect → tek tıkla CA kur.</span></div>
+                  <div class="ln"><b>Android</b><span>Emulator/USB seçilir, CA + proxy otomatik.</span></div>
+                  <div class="ln"><b>Gerçek Cihaz</b><span>QR'ı tara, profili yükle, güven.</span></div>
+                </div>
+                <div class="card change"><h4>Change</h4>
+                  <div class="ln"><b>Yanıt Kuralı</b><span>See → sağ tık → Kural Oluştur.</span></div>
+                  <div class="ln"><b>Breakpoint</b><span>İsteği duraklat, gönderirken düzenle.</span></div>
+                  <div class="ln"><b>SSL Proxying List</b><span>Kapsam kontrolü, pinning bypass.</span></div>
+                </div>
+                <div class="card replay"><h4>Replay</h4>
+                  <div class="ln"><b>Snapshot</b><span>Akışı kaydet, mock snapshot'a al.</span></div>
+                  <div class="ln"><b>Etkinleştir</b><span>Snapshot aktif, çevrimdışı yanıt.</span></div>
+                  <div class="ln"><b>Dışa/İçe Aktar</b><span>JSON paylaş, ekiple senkronla.</span></div>
+                </div>
+              </div>
+              <div class="btn accent" style="height:32px;padding:0 20px" id="connect2">🔌 Cihaz Bağla</div>
+            </div>
+          </div>
+
+          <!-- ===== RULES VIEW (Map Local) ===== -->
+          <div class="view vrow" data-view="rules">
+            <div class="pside">
+              <div class="pside-head"><h3>Yanıt Kuralları</h3><div class="btn green sm" id="rules-new">+ Yeni Kural</div></div>
+              <div class="pside-list">
+                <div class="litem sel"><div class="lt"><span class="sw-mini on"></span><span class="pill g">200</span><b>Login her zaman başarılı</b></div><div class="lsub">POST · /api/auth/login</div></div>
+                <div class="litem"><div class="lt"><span class="sw-mini on"></span><span class="pill c">200</span><b>Boş feed (test)</b></div><div class="lsub">GET · /v1/feed*</div></div>
+                <div class="litem"><div class="lt"><span class="sw-mini"></span><span class="pill r">500</span><b>Ödeme hatası simülasyonu</b></div><div class="lsub">POST · /v1/payments/*</div></div>
+              </div>
+            </div>
+            <div class="pmain" id="rules-editor">
+              <div class="banner info">💡 Kural, eşleşen isteğe <b>sunucuya gitmeden</b> senin yazdığın yanıtı döndürür. Kısayol: See'de bir isteğe sağ tıkla → “Bundan Kural Oluştur”.</div>
+              <div class="sect"><h4><span class="num" style="background:var(--cyan)">1</span> Bu istekle eşleşince…</h4>
+                <div class="field"><label>Kural Adı</label><input class="inp" value="Login her zaman başarılı"></div>
+                <div class="field"><label>URL Deseni (* joker)</label><input class="inp" value="/api/auth/login"></div>
+                <div class="field"><label>Metod</label><input class="inp" value="POST" style="width:120px"></div>
+              </div>
+              <div class="sect"><h4><span class="num" style="background:var(--green)">2</span> …sunucuya gitmeden şu yanıt dönsün</h4>
+                <div class="field"><label>Gecikme (ms)</label><input class="inp" value="0" style="width:120px"></div>
+                <div class="field"><label>Response (HTTP mesajı)</label><textarea class="inp">HTTP/2 200 OK
+content-type: application/json
+
+{ "token": "test-token", "user": { "id": 1, "tier": "premium" } }</textarea></div>
+              </div>
+              <div style="display:flex;gap:10px"><div class="btn accent">Kaydet</div><div class="btn">Vazgeç</div><div class="btn" style="margin-left:auto;color:var(--red-bright)">Sil</div></div>
+            </div>
+          </div>
+
+          <!-- ===== BREAKPOINTS VIEW ===== -->
+          <div class="view vrow" data-view="bp">
+            <div class="pside">
+              <div class="pside-head"><h3>Breakpoint'ler</h3><div class="btn green sm">+ Yeni</div></div>
+              <div class="pside-list">
+                <div class="fb-group" style="padding:6px 8px">Şu an duraklatılmış</div>
+                <div class="litem sel" id="bp-paused" style="border-color:var(--red-bg)">
+                  <div class="lt"><span style="width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 6px var(--red)"></span><span class="pill c">REQ</span><span class="method-tag" style="color:var(--green-bright)">POST</span></div>
+                  <div class="lsub" style="color:var(--text-primary);font-size:12px">/api/auth/login</div>
+                  <div class="lsub">api.market.app</div>
+                </div>
+                <div class="fb-group" style="padding:10px 8px 6px">Breakpoint kuralları</div>
+                <div class="litem"><div class="lt"><span class="sw-mini on"></span><span class="method-tag" style="color:var(--green-bright)">POST</span><b>Login'i durdur</b></div><div class="lsub">/api/auth/*</div></div>
+                <div class="litem"><div class="lt"><span class="sw-mini"></span><span class="method-tag" style="color:var(--amber-bright)">PUT</span><b>Sepet güncelleme</b></div><div class="lsub">/v1/cart/*</div></div>
+              </div>
+            </div>
+            <div class="pmain" id="bp-editor">
+              <div class="banner warn">İstek duraklatıldı — sunucuya henüz gitmedi. Aşağıda düzenle, sonra <b>gönder</b> veya <b>iptal et</b>.</div>
+              <div class="field"><label>İstek (düzenlenebilir)</label><textarea class="inp" style="min-height:200px">POST /api/auth/login HTTP/2
+host: api.market.app
+content-type: application/json
+authorization: Bearer eyJhbGciOi…
+
+{ "email": "deniz@example.com", "password": "••••••••" }</textarea></div>
+              <div style="display:flex;gap:10px"><div class="btn accent" id="bp-send">Düzenleyip Gönder</div><div class="btn" style="color:var(--red-bright)">İptal Et</div></div>
+            </div>
+          </div>
+
+          <!-- ===== SSL PROXYING LIST VIEW (Kapsam) ===== -->
+          <div class="view" data-view="ssl">
+            <div class="pmain" style="padding:20px 24px">
+              <div class="banner info" id="ssl-banner">Kapsam (Focus): pinning yapan uygulamaların kırılmasını ve listenin gürültüyle dolmasını önler. Fiziksel cihazda <b>Otomatik (PAC)</b> proxy şart.</div>
+              <h4 style="margin:0 0 12px;font-size:13px">Hangi trafik yakalansın?</h4>
+              <div class="modecards" id="ssl-modes">
+                <div class="modecard" data-mode="all"><div class="rk"><span class="dot"></span>Tüm trafik</div><p>Her şeyi yakala. Varsayılan. Pinned uygulamalar kırılabilir.</p></div>
+                <div class="modecard on" data-mode="focus"><div class="rk"><span class="dot"></span>Sadece şu domainler</div><p>Kendi API'ne odaklan; gerisi doğrudan internete geçer.</p></div>
+              </div>
+              <div class="sect" id="ssl-include" style="max-width:640px">
+                <h4 style="margin-bottom:8px">🎯 Odak listesi (yalnız bunlar yakalanır)</h4>
+                <div class="dchips">
+                  <span class="dchip">api.market.app <span class="x">×</span></span>
+                  <span class="dchip">cdn.market.app <span class="x">×</span></span>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:8px"><input class="inp" placeholder="api.example.com" style="max-width:280px"><div class="btn accent" id="ssl-add">+ Ekle</div></div>
+              </div>
+              <div class="sect" style="max-width:640px">
+                <h4 style="margin-bottom:8px;color:var(--accent-text)">⃠ Her zaman hariç tut</h4>
+                <p class="d">ProxyLab bu domainlere hiç dokunmaz (banka, pinned servisler).</p>
+                <div class="dchips"><span class="dchip" style="background:rgba(255,255,255,.05);color:var(--text-secondary)">*.banka.com.tr <span class="x">×</span></span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== REPLAY VIEW (Mock & Akış) ===== -->
+          <div class="view" data-view="replay">
+            <div class="substrip" style="border-top:0">
+              <div class="subtabs" id="replay-subtabs">
+                <div class="subtab active" data-rsub="mocks">Mock Snapshots <span class="cnt">3</span></div>
+                <div class="subtab" data-rsub="compare">Karşılaştır (Diff)</div>
+              </div>
+            </div>
+            <!-- MOCKS PANE -->
+            <div class="pane" id="replay-mocks">
+              <div class="pside">
+                <div class="pside-head" id="replay-rec"><h3>Snapshot'lar</h3><div style="display:flex;gap:6px"><div class="btn sm" id="snap-import">⬆ İçe Aktar</div><div class="btn green sm">● Kaydet</div></div></div>
+                <div class="pside-list" id="replay-list">
+                  <div class="litem lstripe sel"><div class="lt"><b>Login + Feed (offline)</b></div><div class="lsub" style="font-family:var(--sans);color:var(--green-bright)">● Aktif · 6 endpoint · 17.06.2026</div></div>
+                  <div class="litem"><div class="lt"><b>Ödeme akışı v2</b></div><div class="lsub" style="font-family:var(--sans)">4 endpoint · 14.06.2026</div></div>
+                  <div class="litem"><div class="lt"><b>Boş sepet senaryosu</b></div><div class="lsub" style="font-family:var(--sans)">2 endpoint · 10.06.2026</div></div>
+                </div>
+              </div>
+              <div class="pmain" id="replay-main">
+                <div class="banner ok">● <b>Mock Aktif:</b> “Login + Feed (offline)” — eşleşen istekler sunucuya gitmeden snapshot'tan yanıtlanır.</div>
+                <h4 style="margin:4px 0 10px;font-size:13px">Snapshot endpoint'leri</h4>
+                <div class="litem"><div class="lt"><span class="pill g">200</span><span class="method-tag" style="color:var(--green-bright)">POST</span><b style="font-family:var(--mono);font-weight:500">/api/auth/login</b></div></div>
+                <div class="litem"><div class="lt"><span class="pill g">200</span><span class="method-tag" style="color:var(--text-secondary)">GET</span><b style="font-family:var(--mono);font-weight:500">/v1/users/me</b></div></div>
+                <div class="litem"><div class="lt"><span class="pill g">200</span><span class="method-tag" style="color:var(--text-secondary)">GET</span><b style="font-family:var(--mono);font-weight:500">/v1/feed?page=1</b></div></div>
+                <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><div class="btn">Devre Dışı Bırak</div><div class="btn">Karşılaştır</div><div class="btn" id="snap-export">⬇ Dışa Aktar (JSON)</div><div class="btn" id="snap-pdf">📄 PDF İndir</div></div>
+              </div>
+            </div>
+            <!-- KARŞILAŞTIR (DIFF) PANE -->
+            <div class="pane" id="replay-compare" style="display:none">
+              <div class="pmain" style="padding:18px 22px">
+                <div class="banner info">Aynı servisin iki farklı çağrısını yan yana karşılaştır — <b>değişen</b>, <b>eklenen</b> ve <b>silinen</b> alanlar renklenir. Regresyon ve “API ne zaman değişti?” avı için. See'de bir yanıta sağ tık → ‘Diff için İşaretle (A)’, ikincisine ‘(B)’.</div>
+                <div style="display:flex;align-items:center;gap:10px;margin:6px 0 12px;font-family:var(--mono);font-size:12.5px">
+                  <span class="pill c">GET</span><b style="font-weight:600">api.market.app/v1/feed?page=1</b>
+                  <span style="color:var(--text-muted);font-family:var(--sans);font-size:11.5px">— aynı endpoint, iki çağrı</span>
+                </div>
+                <div class="diffcols">
+                  <div class="diffcol">
+                    <div class="dh">Ⓐ Çağrı A — 14:02:11 · 200 · 18.0 KB</div>
+                    <pre>{
+  <span class="dk">"page"</span>: 1,
+  <span class="dk">"items"</span>: [
+<span class="dl chg">    { "id": 301, "price": 1299.9, "stock": 5 },</span>
+    { "id": 302, "price": 2150, "stock": 12 },
+  ],
+<span class="dl chg">  "total": 417</span>
+}</pre>
+                  </div>
+                  <div class="diffcol">
+                    <div class="dh">Ⓑ Çağrı B — 14:05:48 · 200 · 18.4 KB</div>
+                    <pre>{
+  <span class="dk">"page"</span>: 1,
+  <span class="dk">"items"</span>: [
+<span class="dl chg">    { "id": 301, "price": 1199.9, "stock": 0 },</span>
+    { "id": 302, "price": 2150, "stock": 12 },
+<span class="dl add">    { "id": 303, "price": 149.9, "stock": 30 },</span>
+  ],
+<span class="dl chg">  "total": 418</span>
+}</pre>
+                  </div>
+                </div>
+                <div class="difflegend">
+                  <span><span style="color:var(--amber-bright)">■</span> <b>Değişti</b> — id 301: price 1299.9→1199.9, stock 5→0 · total 417→418</span>
+                  <span><span style="color:var(--green-bright)">■</span> <b>Eklendi</b> — id 303 (yeni ürün)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== REMOTE VIEW (Request Composer) ===== -->
+          <div class="view vrow" data-view="remote">
+            <div class="pside" style="width:280px">
+              <div class="pside-head"><h3>Kayıtlı İstekler</h3><div class="btn green sm">+ Yeni</div></div>
+              <div class="pside-list">
+                <div class="fb-group" style="padding:6px 8px">Auth</div>
+                <div class="litem sel"><div class="lt"><span class="method-tag" style="color:var(--green-bright)">POST</span><b>Login</b></div><div class="lsub">/api/auth/login</div></div>
+                <div class="litem"><div class="lt"><span class="method-tag" style="color:var(--text-secondary)">GET</span><b>Profilim</b></div><div class="lsub">/v1/users/me</div></div>
+                <div class="fb-group" style="padding:10px 8px 6px">Sepet</div>
+                <div class="litem"><div class="lt"><span class="method-tag" style="color:var(--amber-bright)">PUT</span><b>Ürün ekle</b></div><div class="lsub">/v1/cart/items</div></div>
+              </div>
+            </div>
+            <div class="pmain" id="remote-main">
+              <div class="banner info">Bir istek oluştur, gönder ve yanıtı incele. Kısayol: See'de bir isteğe sağ tıkla → “Remote'a Gönder”; tüm alanlar otomatik dolar. <span class="kbd">⌘↵</span> ile çalıştır.</div>
+              <div style="display:flex;gap:8px;margin-bottom:10px" id="remote-line">
+                <select class="inp" style="width:110px;color:var(--green-bright);font-weight:700">
+                  <option>POST</option><option>GET</option><option>PUT</option><option>PATCH</option><option>DELETE</option>
+                </select>
+                <input class="inp" style="flex:1" value="https://api.market.app/api/auth/login">
+                <div class="btn accent" id="remote-send">Gönder →</div>
+              </div>
+              <div class="field"><label>Headers</label><textarea class="inp" style="min-height:64px">content-type: application/json
+authorization: Bearer eyJhbGciOi…</textarea></div>
+              <div class="field"><label>Body</label><textarea class="inp" style="min-height:90px">{ "email": "deniz@example.com", "password": "••••••••" }</textarea></div>
+              <div id="remote-resp" style="margin-top:6px">
+                <div class="plabel">YANIT</div>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;font-family:var(--mono);font-size:12px"><span class="pill g">200 OK</span><span style="color:var(--text-muted)">234 ms · 1.2 KB</span></div>
+                <div class="json" style="white-space:pre;font-family:var(--mono);font-size:12px;line-height:1.7">{
+  <span class="k">"token"</span>: <span class="s">"eyJhbGciOi…"</span>,
+  <span class="k">"expiresIn"</span>: <span class="n">3600</span>,
+  <span class="k">"user"</span>: { <span class="k">"id"</span>: <span class="n">8842</span>, <span class="k">"tier"</span>: <span class="s">"premium"</span> }
+}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== FORMAT VIEW (JSON) ===== -->
+          <div class="view vrow" data-view="format">
+            <div class="pside" style="width:46%">
+              <div class="pside-head"><h3>JSON Girişi</h3><div style="display:flex;gap:8px"><div class="btn accent sm" id="fmt-go">Formatla</div><div class="btn sm">Temizle</div></div></div>
+              <div style="flex:1;padding:12px;min-height:0"><textarea class="inp" id="fmt-in" style="height:100%;min-height:0">{"order":{"id":771,"items":[{"sku":"KB-302","qty":1,"price":2150}],"total":2150,"paid":false},"user":{"id":8842,"tier":"premium"}}</textarea></div>
+            </div>
+            <div class="pmain" id="fmt-out" style="font-family:var(--mono);font-size:12.5px;line-height:1.7;white-space:pre">
+              <div class="plabel" style="font-family:var(--sans)">FORMATLANMIŞ ÇIKTI · GEÇERLİ JSON</div>
+            </div>
+          </div>
+
+          <!-- ===== SETTINGS VIEW ===== -->
+          <div class="view" data-view="settings">
+            <div class="pmain" style="padding:22px 26px">
+              <div style="max-width:680px;margin:0 auto;width:100%">
+                <h3 style="margin:0 0 2px;font-size:18px">Ayarlar</h3>
+                <p style="margin:0 0 20px;font-size:12.5px;color:var(--text-muted)">ProxyLab uygulama ayarlarını buradan yapılandırabilirsiniz.</p>
+
+                <div class="fb-group" style="padding:0 0 4px">Proxy</div>
+                <div class="row-setting" id="set-port"><div class="meta"><b>Varsayılan Port</b><span>Proxy sunucusunun dinlediği port numarası.</span></div><input class="inp" value="8888" style="width:90px;text-align:center"></div>
+
+                <div class="fb-group" style="padding:18px 0 4px">Sertifika (CA)</div>
+                <div class="row-setting" id="set-ca"><div class="meta"><b>Kök sertifika (CA)</b><span>HTTPS çözümü için bu Mac'in ve cihazların güvenmesi gerekir.</span></div><span class="ca-ok">Mac'te kurulu</span></div>
+
+                <div class="fb-group" style="padding:18px 0 4px">İnternet Bağlantısı</div>
+                <div class="row-setting" id="set-guard"><div class="meta"><b>Sistem proxy durumu</b><span>İnternetin kesikse bazı servisler hâlâ ProxyLab'e yönlenmiş olabilir; düzeltebilirsiniz.</span></div><div style="display:flex;gap:8px"><div class="btn sm">Yeniden denetle</div><div class="btn green sm">Ayarlarımı düzelt</div></div></div>
+
+                <div class="fb-group" style="padding:18px 0 4px">Güncellemeler</div>
+                <div class="row-setting" id="set-update"><div class="meta"><b>ProxyLab sürümü</b><span>v1.1.0 · Yeni sürümleri GitHub üzerinden denetleyin.</span></div><div class="btn sm">Güncellemeleri denetle</div></div>
+
+                <div class="fb-group" style="padding:18px 0 6px;color:var(--red-bright)">Tehlikeli Bölge</div>
+                <div class="danger-box" id="set-reset"><b style="font-size:13px">ProxyLab'ı Sıfırla</b><p style="margin:6px 0 12px;font-size:11.5px;color:var(--text-muted);line-height:1.5">Yakalanan trafik, kurallar, breakpoint'ler, mock snapshot'lar ve ayarlar dahil tüm veriyi siler. Geri alınamaz.</p><div class="btn" style="background:var(--red);border-color:var(--red);color:#fff">Evet, hepsini sil</div></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Status bar -->
+        <div class="statusbar" id="statusbar">
+          <span><span class="num" id="sb-count">0</span> istek</span><span class="sep">·</span>
+          <span><span class="num" id="sb-matched">0</span> eşleşti</span><span class="sep">·</span>
+          <span class="target"><i></i><span id="sb-target">Simulator: iPhone 15 Pro</span></span>
+          <span class="sgrow"></span>
+          <span class="ca-ok">CA bu Mac'te kurulu · güvenilir</span>
+        </div>
+
+        <!-- Connect menu (popover) -->
+        <div class="conmenu" id="conmenu">
+          <div class="sec">Kaynaklar</div>
+          <div class="conitem" id="cm-sysproxy"><span class="ci">🖥</span><div class="cc"><b>Sistem Proxy</b><span>Bu bilgisayarın trafiğini ProxyLab'e yönlendir</span></div><span class="sw-mini" style="margin-left:auto;align-self:center"></span></div>
+          <div class="sec">Kurulum</div>
+          <div class="conitem" data-dev="iossim"><span class="ci">📱</span><div class="cc"><b>iOS Simulator için CA Yükle</b><span>Açık olan simulator'a sertifika yükle</span></div></div>
+          <div class="conitem" data-dev="iphone"><span class="ci">🍎</span><div class="cc"><b>iPhone (Gerçek Cihaz)</b><span>Wi-Fi proxy + CA kurulum rehberi</span></div></div>
+          <div class="conitem" data-dev="androidwifi"><span class="ci">🤖</span><div class="cc"><b>Android (Gerçek Cihaz)</b><span>Wi-Fi proxy + CA rehberi (adb gerekmez)</span></div></div>
+          <div class="conitem" data-dev="androidusb"><span class="ci">🔌</span><div class="cc"><b>Android (USB / adb)</b><span>Cihaz seç, CA otomatik yükle, proxy ayarla</span></div></div>
+          <div class="conitem"><span class="ci">⬇</span><div class="cc"><b>CA'yı Dışa Aktar…</b><span>Kök sertifikayı diske kaydet</span></div></div>
+        </div>
+
+        <!-- See sağ tık menüsü -->
+        <div class="ctxmenu" id="ctxmenu">
+          <div class="ctxitem accent" data-act="rule"><span class="ci">⊟</span>Bundan Kural Oluştur</div>
+          <div class="ctxitem accent" data-act="bp"><span class="ci">⏸</span>Buraya Breakpoint Ekle</div>
+          <div class="ctxitem" data-act="remote"><span class="ci">⇅</span>Remote'a Gönder</div>
+          <div class="ctxitem" data-act="flow"><span class="ci">↺</span>Akışa Ekle</div>
+          <div class="ctxitem" data-act="format"><span class="ci">{ }</span>Body'yi Format'ta Aç</div>
+          <div class="ctxsep"></div>
+          <div class="ctxitem" data-act="curl"><span class="ci">⌘</span>cURL Olarak Kopyala</div>
+          <div class="ctxitem" data-act="save"><span class="ci">★</span>Kaydet (Saklananlar)</div>
+          <div class="ctxitem" data-act="diff"><span class="ci">⇄</span>Diff için İşaretle (A/B)</div>
+          <div class="ctxsep"></div>
+          <div class="ctxitem" data-act="focus"><span class="ci">🎯</span>Bu host'u Kapsam'a ekle</div>
+        </div>
+
+      </div><!-- /#app -->
+
+      <!-- Modal katmanı -->
+      <div class="modal-layer" id="modal-layer">
+        <div class="modal" id="modal"></div>
+      </div>
+
+      <!-- Rehberli tur -->
+      <div id="scrim">
+        <div class="veil" id="veil"></div>
+        <div class="spot" id="spot"></div>
+        <div class="tip" id="tip">
+          <div class="step-l" id="tip-step">Adım 1 / 6</div>
+          <h5 id="tip-title"></h5>
+          <p id="tip-body"></p>
+          <div class="nav">
+            <button class="tbtn" id="tip-skip">Kapat</button>
+            <button class="tbtn accent" id="tip-next">İleri →</button>
+            <span class="prog" id="tip-prog"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="auto-pill" id="auto-pill"><i></i><span id="auto-cap">Otomatik tur oynuyor…</span> <span style="cursor:pointer;text-decoration:underline" id="auto-stop">durdur</span></div>
+      <div class="toastmsg" id="toastmsg"></div>
+
+      <!-- Launch overlay -->
+      <div id="launch">
+        <div class="logo">◆</div>
+        <h2>ProxyLab — İnteraktif Önizleme</h2>
+        <p>Gerçek uygulamanın çalışan bir taklidi. <b>Soldaki listeden</b> bir akış seç (arayüz turu veya cihaz kurulumu) ya da aşağıdan başla.</p>
+        <div class="actions">
+          <div class="btn accent big" id="start-tour">🎯 See turuyla başla</div>
+          <div class="btn big" id="start-auto">▶ Otomatik turu izle</div>
+          <div class="btn big" id="start-free">Serbest gez →</div>
+        </div>
+        <div class="hint">İpucu: soldaki “Cihaz Kurulumu” bölümünden iPhone/Android bağlama adımlarını da gezebilirsin.</div>
+      </div>
+
+    </div><!-- /.stage -->
+  </div><!-- /.main -->
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(s,r){return (r||document).querySelector(s)};
+  var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+
+  /* ═══════════ Sahte trafik (See) ═══════════ */
+  var METHOD_COLOR={GET:"#a1a1aa",POST:"#b9b8fb",PUT:"#fbbf24",PATCH:"#7dd3fc",DELETE:"#fca5a5",OPTIONS:"#c4b5fd"};
+  function statusColor(c){return c<300?"#22c55e":c<400?"#7dd3fc":c<500?"#f59e0b":"#ef4444"}
+  var SEED=[
+    {m:"POST",h:"api.market.app",p:"/v1/auth/login",s:200,sz:1248,d:234,mock:false,reqH:{"content-type":"application/json","user-agent":"MarketApp/4.2 (iPhone; iOS 17.4)"},reqB:{email:"deniz@example.com",password:"••••••••",device:"iPhone15,2"},resH:{"content-type":"application/json","set-cookie":"sid=ab12…; HttpOnly"},resB:{token:"eyJhbGciOi…",expiresIn:3600,user:{id:8842,name:"Deniz Yılmaz",tier:"premium"}}},
+    {m:"GET",h:"api.market.app",p:"/v1/users/me",s:200,sz:845,d:89,mock:false,reqH:{"authorization":"Bearer eyJhbGciOi…"},reqB:null,resH:{"content-type":"application/json","cache-control":"private, max-age=60"},resB:{id:8842,name:"Deniz Yılmaz",tier:"premium",unread:3}},
+    {m:"GET",h:"cdn.market.app",p:"/avatars/8842.webp",s:200,sz:24576,d:156,mock:false,reqH:{"accept":"image/webp,*/*"},reqB:null,resH:{"content-type":"image/webp","cache-control":"public, max-age=86400"},resB:"‹ikili görsel verisi · 24 KB›"},
+    {m:"GET",h:"api.market.app",p:"/v1/feed?page=1&limit=20",s:200,sz:18432,d:312,mock:false,reqH:{"authorization":"Bearer eyJhbGciOi…"},reqB:null,resH:{"content-type":"application/json","x-total-count":"417"},resB:{page:1,items:[{id:301,title:"Kablosuz Kulaklık",price:1299.9},{id:302,title:"Mekanik Klavye",price:2150}],hasMore:true}},
+    {m:"POST",h:"telemetry.market.app",p:"/track",s:204,sz:0,d:45,mock:false,reqH:{"content-type":"application/json"},reqB:{event:"feed_view",ts:1718600000},resH:{},resB:"‹boş gövde · 204 No Content›"},
+    {m:"GET",h:"api.market.app",p:"/v1/products/302",s:200,sz:2156,d:121,mock:true,reqH:{"authorization":"Bearer eyJhbGciOi…"},reqB:null,resH:{"content-type":"application/json","x-proxylab":"mocked"},resB:{id:302,title:"Mekanik Klavye",price:2150,stock:12,rating:4.7}},
+    {m:"PUT",h:"api.market.app",p:"/v1/cart/items",s:200,sz:512,d:98,mock:false,reqH:{"authorization":"Bearer eyJhbGciOi…","content-type":"application/json"},reqB:{productId:302,qty:1},resH:{"content-type":"application/json"},resB:{cartId:"c-771",total:2150,count:1}},
+    {m:"GET",h:"api.market.app",p:"/v1/notifications",s:200,sz:3401,d:142,mock:false,reqH:{"authorization":"Bearer eyJhbGciOi…"},reqB:null,resH:{"content-type":"application/json"},resB:{unread:3,items:[{id:1,type:"price_drop"},{id:2,type:"order_shipped"}]}},
+    {m:"GET",h:"api.market.app",p:"/v1/orders",s:401,sz:88,d:64,mock:false,reqH:{"authorization":"Bearer ‹süresi dolmuş›"},reqB:null,resH:{"content-type":"application/json","www-authenticate":"Bearer error=\"invalid_token\""},resB:{error:"unauthorized",message:"Token süresi doldu"}},
+    {m:"DELETE",h:"api.market.app",p:"/v1/cart/items/302",s:200,sz:128,d:76,mock:false,reqH:{"authorization":"Bearer eyJhbGciOi…"},reqB:null,resH:{"content-type":"application/json"},resB:{cartId:"c-771",total:0,count:0}},
+    {m:"POST",h:"api.market.app",p:"/v1/payments/checkout",s:500,sz:256,d:884,mock:false,reqH:{"authorization":"Bearer eyJhbGciOi…","content-type":"application/json"},reqB:{cartId:"c-771",method:"card"},resH:{"content-type":"application/json","x-request-id":"r-err-2201"},resB:{error:"internal_error",message:"Ödeme sağlayıcısına ulaşılamadı",traceId:"tr-88a2"}},
+    {m:"GET",h:"maps.market.app",p:"/tiles/14/9512/6173.png",s:200,sz:12290,d:201,mock:false,reqH:{"accept":"image/png"},reqB:null,resH:{"content-type":"image/png"},resB:"‹harita karosu · 12 KB›"}
+  ];
+  var rows=[],count=0,matched=0,streaming=false,streamTimer=null,seedIdx=0;
+  var scroll=$("#scroll"),hero=$("#hero"),detail=$("#detail");
+  function fmtBytes(b){return b===0?"0 B":b<1024?b+" B":b<1048576?(b/1024).toFixed(1)+" KB":(b/1048576).toFixed(1)+" MB"}
+  function fmtDur(ms){return ms<1000?ms+"ms":(ms/1000).toFixed(2)+"s"}
+  function nowClock(){var d=new Date();function p(n){return(n<10?"0":"")+n}return p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds())}
+  function esc(s){return String(s).replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c]})}
+  function jsonHtml(v,ind){ind=ind||0;var pad="  ".repeat(ind),pad1="  ".repeat(ind+1);
+    if(v===null)return '<span class="p">null</span>';
+    if(typeof v==="string")return '<span class="s">"'+esc(v)+'"</span>';
+    if(typeof v==="number")return '<span class="n">'+v+'</span>';
+    if(typeof v==="boolean")return '<span class="b">'+v+'</span>';
+    if(Array.isArray(v)){if(!v.length)return "[]";return "[\n"+v.map(function(x){return pad1+jsonHtml(x,ind+1)}).join(",\n")+"\n"+pad+"]"}
+    var keys=Object.keys(v);if(!keys.length)return "{}";
+    return "{\n"+keys.map(function(k){return pad1+'<span class="k">"'+esc(k)+'"</span>: '+jsonHtml(v[k],ind+1)}).join(",\n")+"\n"+pad+"}"}
+  function rowHtml(r,i){var mc=METHOD_COLOR[r.m]||"#a1a1aa";
+    return '<div class="row new" data-i="'+i+'"><div class="stripe" style="background:'+mc+'"></div>'+
+      '<div class="c-method"><span class="src">🖥</span><span class="m" style="color:'+mc+'">'+r.m+'</span></div>'+
+      '<div class="c-host">'+esc(r.h)+(r.mock?'<span class="mock-badge">MOCK</span>':'')+'</div>'+
+      '<div class="c-path">'+esc(r.p)+'</div><div class="c-time">'+r.clock+'</div>'+
+      '<div class="c-size">'+fmtBytes(r.sz)+'</div><div class="c-dur">'+fmtDur(r.d)+'</div>'+
+      '<div class="c-status" style="color:'+statusColor(r.s)+'">'+r.s+'</div></div>'}
+  function pushRow(){var base=SEED[seedIdx%SEED.length];seedIdx++;var r=Object.assign({},base);r.clock=nowClock();
+    rows.push(r);var i=rows.length-1;scroll.insertAdjacentHTML("afterbegin",rowHtml(r,i));
+    count++;if(r.mock)matched++;if(r.s===401||r.s===500)matched++;
+    $("#sb-count").textContent=count;$("#cnt-all").textContent=count;$("#sb-matched").textContent=matched;
+    if(count===1)hero.classList.add("gone");
+    while(scroll.children.length>40)scroll.removeChild(scroll.lastChild)}
+  function startStream(){if(streaming)return;streaming=true;$(".tab[data-tab='see']").classList.add("is-live");pushRow();streamTimer=setInterval(pushRow,900)}
+  function stopStream(){streaming=false;if(streamTimer)clearInterval(streamTimer);streamTimer=null}
+  function resetSee(){stopStream();rows=[];count=0;matched=0;seedIdx=0;scroll.innerHTML="";hero.classList.remove("gone");closeDetail();
+    $("#scroll").style.display="";$("#saved-scroll").style.display="none";$$('.subtab[data-sub]').forEach(function(x){x.classList.toggle("active",x.getAttribute("data-sub")==="all")});
+    $("#sb-count").textContent="0";$("#cnt-all").textContent="0";$("#sb-matched").textContent="0"}
+
+  var curRow=null,curPhase="req",curDt="body";
+  function openDetail(i){curRow=rows[i];if(!curRow)return;$$(".row").forEach(function(el){el.classList.remove("sel")});
+    var el=scroll.querySelector('.row[data-i="'+i+'"]');if(el)el.classList.add("sel");detail.classList.add("open");renderDetail()}
+  function closeDetail(){detail.classList.remove("open");curRow=null;$$(".row").forEach(function(el){el.classList.remove("sel")})}
+  function renderDetail(){if(!curRow)return;var r=curRow;
+    $("#durl").innerHTML=(curPhase==="res"?'<span class="code" style="color:'+statusColor(r.s)+'">'+r.s+'</span>':'<span class="code" style="color:'+METHOD_COLOR[r.m]+'">'+r.m+'</span>')+esc("https://"+r.h+r.p);
+    var H=curPhase==="req"?r.reqH:r.resH,B=curPhase==="req"?r.reqB:r.resB,body=$("#dbody"),html="";
+    if(curDt==="headers"){html='<div class="plabel">'+(curPhase==="req"?"REQUEST":"RESPONSE")+' HEADERS</div><table class="htable">';
+      Object.keys(H||{}).forEach(function(k){html+='<tr><td>'+esc(k)+'</td><td>'+esc(H[k])+'</td></tr>'});
+      if(!H||!Object.keys(H).length)html+='<tr><td colspan="2" style="color:var(--text-faint)">header yok</td></tr>';html+="</table>"}
+    else if(curDt==="raw"){var raw=(curPhase==="req"?r.m+" "+r.p+" HTTP/2\n":"HTTP/2 "+r.s+"\n");
+      Object.keys(H||{}).forEach(function(k){raw+=k+": "+H[k]+"\n"});raw+="\n"+(B===null?"":typeof B==="string"?B:JSON.stringify(B,null,2));
+      html='<div class="plabel">RAW</div><div style="white-space:pre-wrap;color:var(--text-secondary)">'+esc(raw)+'</div>'}
+    else{html='<div class="plabel">'+(curPhase==="req"?"REQUEST":"RESPONSE")+' BODY</div>';
+      if(B===null)html+='<div style="color:var(--text-faint)">Body içeriği yok</div>';
+      else if(typeof B==="string")html+='<div style="color:var(--text-faint)">'+esc(B)+'</div>';
+      else html+='<div class="json" style="white-space:pre">'+jsonHtml(B)+'</div>'}
+    body.innerHTML=html}
+
+  scroll.addEventListener("click",function(e){var row=e.target.closest(".row");if(!row)return;openDetail(parseInt(row.getAttribute("data-i"),10))});
+
+  /* ── Sağ tık menüsü + See'den kural/breakpoint/remote canlandırması ── */
+  var ctxmenu=$("#ctxmenu"),ctxRow=null;
+  function showToast(msg){var t=$("#toastmsg");t.textContent=msg;t.classList.add("show");clearTimeout(showToast._t);showToast._t=setTimeout(function(){t.classList.remove("show")},2400)}
+  function openCtx(clientX,clientY,r){ctxRow=r;var st=$("#stage").getBoundingClientRect();ctxmenu.classList.add("show");
+    var mw=ctxmenu.offsetWidth,mh=ctxmenu.offsetHeight;
+    var x=Math.min(clientX-st.left,st.width-mw-8),y=Math.min(clientY-st.top,st.height-mh-8);
+    ctxmenu.style.left=Math.max(6,x)+"px";ctxmenu.style.top=Math.max(6,y)+"px"}
+  scroll.addEventListener("contextmenu",function(e){var row=e.target.closest(".row");if(!row)return;e.preventDefault();
+    openCtx(e.clientX,e.clientY,rows[parseInt(row.getAttribute("data-i"),10)])});
+  document.addEventListener("click",function(){if(!scrimOn)ctxmenu.classList.remove("show")});
+  document.addEventListener("contextmenu",function(e){if(!e.target.closest(".scroll"))ctxmenu.classList.remove("show")});
+  $$("#ctxmenu .ctxitem").forEach(function(it){it.addEventListener("click",function(e){e.stopPropagation();ctxmenu.classList.remove("show");ctxAction(it.getAttribute("data-act"))})});
+  function rPath(r){return (r.p||"/").split("?")[0]}
+  function prefillRule(r){var ed=$("#rules-editor");var inps=ed.querySelectorAll(".sect .inp");
+    if(inps[0])inps[0].value="Mock: "+r.m+" "+rPath(r);if(inps[1])inps[1].value=rPath(r);if(inps[2])inps[2].value=r.m;
+    var list=$(".view[data-view='rules'] .pside-list");$$(".view[data-view='rules'] .litem").forEach(function(x){x.classList.remove("sel")});
+    var li=document.createElement("div");li.className="litem sel flash";
+    li.innerHTML='<div class="lt"><span class="sw-mini on"></span><span class="pill g">200</span><b>Mock: '+esc(rPath(r))+'</b></div><div class="lsub">'+r.m+' · '+esc(rPath(r))+'</div>';
+    list.insertBefore(li,list.firstChild)}
+  function prefillBp(r){var list=$(".view[data-view='bp'] .pside-list");
+    var li=document.createElement("div");li.className="litem sel flash";li.style.borderColor="var(--red-bg)";
+    li.innerHTML='<div class="lt"><span style="width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 6px var(--red)"></span><span class="pill c">REQ</span><span class="method-tag" style="color:'+(METHOD_COLOR[r.m]||"#a1a1aa")+'">'+r.m+'</span></div><div class="lsub" style="color:var(--text-primary);font-size:12px">'+esc(rPath(r))+'</div><div class="lsub">'+esc(r.h)+'</div>';
+    list.insertBefore(li,list.children[1]||null)}
+  function prefillRemote(r){var ed=$("#remote-main");var sel=ed.querySelector("select"),url=ed.querySelector("#remote-line input");
+    if(sel)sel.value=r.m;if(url)url.value="https://"+r.h+r.p;var line=$("#remote-line");if(line){line.classList.add("flash");setTimeout(function(){line.classList.remove("flash")},1400)}}
+  function prefillFormat(r){var b=r.resB;var txt=(b&&typeof b==="object")?JSON.stringify(b):(typeof b==="string"?b:'{ "info": "bu yanıtın gövdesi yok" }');
+    $("#fmt-in").value=txt;showView("format");syncFlowbar("format");fmtRun()}
+  // Kaydedilenler (Saklananlar) — sağ tık → Kaydet buraya yansır
+  var savedItems=[];
+  function savedRowHtml(r){var mc=METHOD_COLOR[r.m]||"#a1a1aa";
+    return '<div class="row" data-si="'+(savedItems.length-1)+'"><div class="stripe" style="background:'+mc+'"></div>'+
+      '<div class="c-method"><span class="src">★</span><span class="m" style="color:'+mc+'">'+r.m+'</span></div>'+
+      '<div class="c-host">'+esc(r.h)+'</div><div class="c-path">'+esc(r.p)+'</div>'+
+      '<div class="c-time">'+(r.clock||nowClock())+'</div><div class="c-size">'+fmtBytes(r.sz||0)+'</div>'+
+      '<div class="c-dur">'+fmtDur(r.d||0)+'</div><div class="c-status" style="color:'+statusColor(r.s||200)+'">'+(r.s||200)+'</div></div>'}
+  function saveRow(r){savedItems.push(Object.assign({},r));var sc=$("#saved-scroll"),emp=$("#saved-empty");if(emp)emp.style.display="none";
+    sc.insertAdjacentHTML("beforeend",savedRowHtml(r));var last=sc.lastChild;last.classList.add("flash");
+    $("#cnt-saved").textContent=savedItems.length}
+  function showSub(sub){$$('.subtab[data-sub]').forEach(function(x){x.classList.toggle("active",x.getAttribute("data-sub")===sub)});
+    $("#scroll").style.display=sub==="all"?"":"none";$("#saved-scroll").style.display=sub==="saved"?"":"none";
+    if(sub==="saved")hero.classList.add("gone")}
+  function ctxAction(act){var r=ctxRow||rows[0]||{m:"GET",h:"api.market.app",p:"/v1/users/me",s:200,resB:{ok:true}};
+    if(act==="rule"){showView("rules");syncFlowbar("rules");prefillRule(r);showToast("✓ See → Kural oluşturuldu — alanlar otomatik dolduruldu")}
+    else if(act==="bp"){showView("bp");syncFlowbar("bp");prefillBp(r);showToast("✓ See → Breakpoint eklendi: "+rPath(r))}
+    else if(act==="remote"){showView("remote");syncFlowbar("remote");prefillRemote(r);showToast("✓ See → Remote'a gönderildi")}
+    else if(act==="format"){prefillFormat(r);showToast("✓ Body, Format (JSON) ekranında açıldı")}
+    else if(act==="flow")showToast("✓ Akışa eklendi");
+    else if(act==="curl")showToast("✓ cURL panoya kopyalandı");
+    else if(act==="save"){saveRow(r);showSub("saved");showToast("★ Kaydedildi → Kaydedilenler ("+savedItems.length+")")}
+    else if(act==="diff")showToast("⇄ Diff A olarak işaretlendi — ikinciye sağ tık → Diff B");
+    else if(act==="focus")showToast("🎯 "+r.h+" → Kapsam (Focus) listesine eklendi")}
+  $("#detail-x").addEventListener("click",closeDetail);
+  $$("#dtabs span").forEach(function(s){s.addEventListener("click",function(){$$("#dtabs span").forEach(function(x){x.classList.remove("on")});s.classList.add("on");curDt=s.getAttribute("data-dt");renderDetail()})});
+  $$(".seg b").forEach(function(b){b.addEventListener("click",function(){$$(".seg b").forEach(function(x){x.classList.remove("on")});b.classList.add("on");curPhase=b.getAttribute("data-phase");renderDetail()})});
+
+  /* ═══════════ View switching ═══════════ */
+  function showView(name){
+    $$(".view").forEach(function(v){v.classList.toggle("show",v.getAttribute("data-view")===name)});
+    $$(".tab").forEach(function(t){t.classList.toggle("active",t.getAttribute("data-tab")===name)});
+    $("#substrip").classList.toggle("hidden",name!=="see");
+    if(name==="format")fmtRun();
+  }
+  $$(".tab").forEach(function(t){t.addEventListener("click",function(){var n=t.getAttribute("data-tab");showView(n);syncFlowbar(n)})});
+  $$(".subtab").forEach(function(t){t.addEventListener("click",function(){var p=t.parentNode;$$(".subtab",p).forEach(function(x){x.classList.remove("active")});t.classList.add("active");var sub=t.getAttribute("data-sub");if(sub)showSub(sub);var rs=t.getAttribute("data-rsub");if(rs)showRsub(rs)})});
+
+  /* Format */
+  function fmtRun(){try{var v=JSON.parse($("#fmt-in").value);$("#fmt-out").innerHTML='<div class="plabel" style="font-family:var(--sans)">FORMATLANMIŞ ÇIKTI · GEÇERLİ JSON</div><div class="json">'+jsonHtml(v)+'</div>'}catch(e){$("#fmt-out").innerHTML='<div class="banner warn" style="font-family:var(--sans)">Geçersiz JSON: '+esc(e.message)+'</div>'}}
+  $("#fmt-go").addEventListener("click",fmtRun);
+
+  /* SSL mode cards */
+  $$("#ssl-modes .modecard").forEach(function(c){c.addEventListener("click",function(){$$("#ssl-modes .modecard").forEach(function(x){x.classList.remove("on")});c.classList.add("on");$("#ssl-include").style.display=c.getAttribute("data-mode")==="focus"?"":"none"})});
+
+  /* Replay — Snapshot / Akış paneli geçişi + içe/dışa aktar + PDF + yeni akış */
+  function showRsub(sub){$$('.subtab[data-rsub]').forEach(function(x){x.classList.toggle("active",x.getAttribute("data-rsub")===sub)});
+    $("#replay-mocks").style.display=sub==="mocks"?"":"none";$("#replay-compare").style.display=sub==="compare"?"":"none"}
+  function bindClick(sel,fn){var el=$(sel);if(el)el.addEventListener("click",fn)}
+  bindClick("#snap-import",function(){showToast("⬆ Snapshot içe aktarıldı (snapshot.json)")});
+  bindClick("#snap-export",function(){showToast("⬇ Snapshot dışa aktarıldı → snapshot.json")});
+  bindClick("#snap-pdf",function(){showToast("📄 PDF indirildi → snapshot-raporu.pdf")});
+
+  /* Toggles */
+  $("#sysproxy").addEventListener("click",function(){this.classList.toggle("on")});
+  // Chip popover'ları (Domain Filtresi / Map / Breakpoint'ler)
+  function closePops(){$$(".pop").forEach(function(p){p.classList.remove("show")});$$("#chips .chip").forEach(function(c){c.classList.remove("on")})}
+  function openPop(chipSel,popSel){var chip=$(chipSel),pop=$(popSel);var was=pop.classList.contains("show");closePops();if(!was){pop.classList.add("show");chip.classList.add("on")}}
+  [["#chip-domain","#pop-domain"],["#chip-map","#pop-map"],["#chip-bp","#pop-bp"]].forEach(function(pr){
+    $(pr[0]).addEventListener("click",function(e){e.stopPropagation();openPop(pr[0],pr[1])})});
+  document.addEventListener("click",function(e){if(!scrimOn && !e.target.closest("#chips"))closePops()});
+  $$(".pop .plink").forEach(function(l){l.addEventListener("click",function(){closePops();var g=l.getAttribute("data-goto");showView(g);syncFlowbar(g)})});
+  function fakeConnect(){if(!streaming)startStream();$("#sysproxy").classList.add("on")}
+  $("#connect2").addEventListener("click",fakeConnect);
+
+  /* Connect menu */
+  var conmenu=$("#conmenu");
+  $("#connect").addEventListener("click",function(e){e.stopPropagation();conmenu.classList.toggle("show")});
+  document.addEventListener("click",function(e){if(!conmenu.contains(e.target)&&e.target.id!=="connect")conmenu.classList.remove("show")});
+  $("#cm-sysproxy").addEventListener("click",function(){fakeConnect();$(".sw-mini",this).classList.add("on")});
+  $$("#conmenu .conitem[data-dev]").forEach(function(it){it.addEventListener("click",function(){conmenu.classList.remove("show");openDeviceModal(it.getAttribute("data-dev"))})});
+
+  $("#restart").addEventListener("click",function(){closeModal();endTour();stopAuto();if(curFlow&&curFlow.indexOf("dev:")===0){startFlow(curFlow)}else{showView("see");syncFlowbar("see");resetSee();startStream()}});
+
+  /* ═══════════ Cihaz kurulum modalları ═══════════ */
+  var MAC_IP="192.168.1.50"; // ÖRNEK IP — gerçek ağ adresi değil; uygulamada sizin Mac'inizin LAN IP'si gösterilir
+  var PAC="http://"+MAC_IP+":8889/proxy.pac";
+  var CA_URL="http://"+MAC_IP+":8889/ca.crt";
+  function qrSvg(){ // dekoratif sahte QR
+    var n=21,cells="";
+    var seed=[7,11,13,17,19,23,29,31,37,41];var k=0;
+    for(var y=0;y<n;y++)for(var x=0;x<n;x++){
+      var corner=(x<7&&y<7)||(x>=n-7&&y<7)||(x<7&&y>=n-7);
+      var on;
+      if(corner){on=(x===0||x===6||y===0||y===6||(x>=2&&x<=4&&y>=2&&y<=4))?1:0;
+        if((x>=n-7&&y<7)){var lx=x-(n-7);on=(lx===0||lx===6||y===0||y===6||(lx>=2&&lx<=4&&y>=2&&y<=4))?1:0}
+        if((x<7&&y>=n-7)){var ly=y-(n-7);on=(x===0||x===6||ly===0||ly===6||(x>=2&&x<=4&&ly>=2&&ly<=4))?1:0}
+      } else { on=((x*seed[y%10]+y*seed[x%10])%3===0)?1:0 }
+      if(on)cells+='<rect x="'+x+'" y="'+y+'" width="1" height="1"/>'}
+    return '<svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg" fill="#0d0d10" shape-rendering="crispEdges">'+cells+'</svg>'}
+
+  // Telefon ekranı taklitleri (gerçek cihaz screenshot'ı yerine — IP'siz, tutarlı)
+  function phoneBar(){return '<div class="phbar"><span>9:41</span><span>5G&nbsp;&nbsp;100%</span></div>'}
+  function iosTrustPhone(){return '<div class="phone"><div class="scr">'+phoneBar()+
+    '<div class="phnav">‹ Hakkında</div><div class="phttl">Sertifika Güveni Ayarları</div>'+
+    '<div class="phgrp">Kök sertifikalar için tam güveni etkinleştir</div>'+
+    '<div class="phr"><span>ProxyLab CA</span><span class="phtog"></span></div></div></div>'+
+    '<p class="phcap">iOS · Ayarlar → Genel → Hakkında → Sertifika Güveni Ayarları</p>'}
+  function iosProxyPhone(manual){return '<div class="phone"><div class="scr">'+phoneBar()+
+    '<div class="phnav">‹ Wi-Fi</div><div class="phttl">Proxy Yapılandır</div>'+
+    '<div class="phseg"><span>Kapalı</span><span'+(manual?' class="on"':'')+'>Manuel</span><span'+(manual?'':' class="on"')+'>Otomatik</span></div>'+
+    (manual
+      ?'<div class="phfield"><div class="lbl">Sunucu</div>'+MAC_IP+'</div><div class="phfield"><div class="lbl">Port</div>8888</div><div class="phr"><span>Kimlik Doğrulama</span><span class="phtog" style="background:#e5e5ea"></span></div>'
+      :'<div class="phfield"><div class="lbl">URL</div>'+PAC+'</div>')+
+    '</div></div><p class="phcap">iOS · Wi-Fi → (ⓘ) → Proxy Yapılandır → '+(manual?'<b>Manuel</b>':'<b>Otomatik</b>')+'</p>'}
+  function androidCertPhone(){return '<div class="phone android dark"><div class="scr">'+phoneBar()+
+    '<div class="phnav">← Şifreleme ve kimlik bilgileri</div><div class="phttl">Sertifika yükle</div>'+
+    '<div class="phr"><span>CA sertifikası</span><span class="v">ca.crt · yüklendi ✓</span></div></div></div>'+
+    '<p class="phcap">Android · Ayarlar → Güvenlik → Sertifika yükle → CA sertifikası</p>'}
+  function androidProxyPhone(manual){return '<div class="phone android dark"><div class="scr">'+phoneBar()+
+    '<div class="phnav">← Ağı değiştir</div><div class="phttl">Proxy</div>'+
+    '<div class="phr sel"><span>'+(manual?'Elle':'Proxy Otomatik Yapılandırma')+'</span><span class="chk">✓</span></div>'+
+    (manual
+      ?'<div class="phfield"><div class="lbl">Ana bilgisayar adı</div>'+MAC_IP+'</div><div class="phfield"><div class="lbl">Port</div>8888</div>'
+      :'<div class="phfield"><div class="lbl">PAC URL</div>'+PAC+'</div>')+
+    '</div></div><p class="phcap">Android · Wi-Fi → Gelişmiş → Proxy → '+(manual?'<b>Elle</b>':'<b>Otomatik Yapılandırma</b>')+'</p>'}
+
+  function modalShell(title,sub,bodyHtml,footHtml){
+    return '<div class="modal-h"><div class="tt"><h3>'+title+'</h3>'+(sub?'<p>'+sub+'</p>':'')+'</div><div class="x" id="modal-x">×</div></div>'+
+      '<div class="modal-b">'+bodyHtml+'</div>'+(footHtml?'<div class="modal-f">'+footHtml+'</div>':'')}
+
+  var DEVMODALS={
+    iossim:function(){return modalShell("iOS Simulator Setup","2 simulator bulundu. CA yüklemek için bir cihaz seç:",
+      '<div class="banner warn" id="ds-warn">İki adım gerekir: ① Aşağıdan CA yükle (TLS güveni). ② Araç çubuğundaki <b>System Proxy</b>\'yi AÇ — simulator Mac\'in ağ yığınını kullanır.</div>'+
+      '<div class="devcard" id="ds-target"><div class="di"><b>iPhone 15 Pro</b><div class="id">iOS 18.2 · 1F2E3D4C…</div></div><div class="btn accent sm" id="ds-install">CA yükle & yeniden başlat</div></div>'+
+      '<div class="devcard"><div class="di"><b>iPad Air</b><div class="id">iOS 17.5 · 2G3H4I5J…</div></div><span class="ca-ok">✓ kurulu</span></div>',
+      '<div class="btn sm">↻ Yenile</div><div class="btn sm" id="modal-close">Kapat</div>')},
+    androidusb:function(){return modalShell("Android Setup (Emülatör / USB · adb)","adb ile bulunan cihazlar. Bir aksiyon seç:",
+      '<div class="banner info">ProxyLab cihazları <b>adb</b> ile bulur. <b>Emülatör</b> için USB kablo gerekmez — Android Studio\'da açıkken otomatik listelenir. <b>Fiziksel cihaz</b> için: USB Hata Ayıklama\'yı aç, USB ile bağla.</div>'+
+      '<div class="devcard" id="ds-target"><div class="di"><b><span class="badge-em em">EMÜLATÖR</span>Pixel 6 API 34</b><div class="id">emulator-5554 · USB gerekmez</div></div></div>'+
+      '<div style="display:flex;gap:8px;margin:-2px 0 14px"><div class="btn sm" id="ds-install" style="background:var(--orange-bg);color:var(--orange-bright);border-color:var(--orange-bg)">⚠ CA Yükle</div><div class="btn accent sm" id="ds-proxy">Proxy\'yi Aç</div><div class="btn sm" style="color:var(--red-bright)">Proxy\'yi Kapat</div></div>'+
+      '<div class="devcard"><div class="di"><b><span class="badge-em dv">FİZİKSEL · USB</span>Galaxy S23</b><div class="id">2ABCDEF1234… · USB Hata Ayıklama açık</div></div></div>'+
+      '<div class="banner warn" style="margin-top:6px">Android 7+: kullanıcı CA\'sı yalnız buna izin veren uygulamalarda geçerli. Tüm uygulamalar için emülatörde sistem deposuna kurulur (otomatik).</div>',
+      '<div class="btn sm">↻ Yenile</div><div class="btn sm" id="modal-close">Kapat</div>')},
+    iphone:function(){return wifiModal("ios")},
+    androidwifi:function(){return wifiModal("android")}
+  };
+  function wifiModal(plat){
+    var ios=plat==="ios";
+    var title=ios?"iOS Kurulum Rehberi":"Android Kurulum Rehberi";
+    var sub=ios?"iPhone/iPad'inizi bu Mac'in proxy'sine yönlendirmek için 5 adım.":"Android cihazınızı bu Mac'in proxy'sine yönlendirmek için 5 adım (adb gerekmez).";
+    var browser=ios?"Safari":"Chrome";
+    var trustPath=ios
+      ?'Ayarlar → Genel → VPN ve Aygıt Yönetimi → ProxyLab CA → <b>Yükle</b><br>sonra Ayarlar → Genel → Hakkında → <b>Sertifika Güveni Ayarları</b> → aç'
+      :'Ayarlar → Güvenlik → Şifreleme ve kimlik bilgileri → Sertifika yükle → <b>CA sertifikası</b> → inen <code>ca.crt</code>\'yi seç';
+    var pacPath=ios
+      ?'Ayarlar → Wi-Fi → (bağlı ağ ⓘ) → Proxy Yapılandır → <b>Otomatik</b>'
+      :'Ayarlar → Wi-Fi → (ağa basılı tut) → Ağı değiştir → Gelişmiş → Proxy → <b>Proxy Otomatik Yapılandırma</b>';
+    var manualPath=ios
+      ?'Ayarlar → Wi-Fi → (bağlı ağ ⓘ) → Proxy Yapılandır → <b>Manuel</b>'
+      :'Ayarlar → Wi-Fi → Gelişmiş → Proxy → <b>Elle</b>';
+    var trustPhone=ios?iosTrustPhone():androidCertPhone();
+    var pacPhone=ios?iosProxyPhone(false):androidProxyPhone(false);
+    var manualPhone=ios?iosProxyPhone(true):androidProxyPhone(true);
+    return modalShell(title,sub,
+      '<div class="banner warn" style="margin-bottom:14px">⚠ Ekrandaki <b>'+MAC_IP+'</b> yalnızca <b>örnektir</b> — gerçek uygulamada <b>kendi Mac\'inizin IP\'si</b> görünür. Buradan kopyalamayın; uygulamadaki adresi/IP\'yi kullanın.</div>'+
+      '<div class="step done" id="ws1"><div class="sb">✓</div><div class="sc"><b>1 · Sertifikayı bu Mac\'e yükle</b><div class="sd">Kök sertifika bu Mac\'in anahtar zincirinde güvenli olmalı.</div><div style="margin-top:7px"><span class="ca-ok">Yüklü ve güvenli</span></div></div></div>'+
+      '<div class="step" id="ws2"><div class="sb">2</div><div class="sc"><b>2 · Sertifikayı cihaza indir</b><div class="sd">Cihazda <b>'+browser+'</b> ile QR\'ı tarayın. <b>QR okunmazsa</b> aynı adresi cihazın tarayıcı <b>adres çubuğuna elle yazın</b>. Profil/dosya inecek. <i>Bunu proxy\'den ÖNCE yapın.</i></div>'+
+        '<div class="urlbox">'+CA_URL+'<span class="cp" id="ws-copy">Kopyala</span></div><div class="qr">'+qrSvg()+'</div><div class="phcap" style="text-align:left;margin-top:6px">↑ Örnek adres — uygulamadaki gerçek adresi yazın</div></div></div>'+
+      '<div class="step" id="ws3"><div class="sb">3</div><div class="sc"><b>3 · CA\'yı yükle ve güven</b><div class="sd">'+trustPath+'</div>'+(ios?'':'<div class="banner warn" style="margin-top:8px">Android 7+\'da kullanıcı CA\'sı yalnız buna izin veren uygulamalarda geçerlidir.</div>')+'<div class="phones">'+trustPhone+'</div></div></div>'+
+      '<div class="step" id="ws4"><div class="sb">4</div><div class="sc"><b>4 · Wi-Fi proxy\'sini Otomatik (PAC) ayarla — EN SON</b>'+
+        '<div class="banner warn" style="margin:6px 0">Bunu en son yap: sertifika kurulmadan proxy açarsan HTTPS kırılır, sertifikayı bile indiremezsin.</div>'+
+        '<div class="sd">'+pacPath+'</div><div class="path">Otomatik Proxy URL (PAC):<br>'+PAC+'<br>Kimlik doğrulama: Hayır</div>'+
+        '<div class="banner info" style="margin-top:8px">Kapsam (Focus) açıkken yalnız listenizdeki domain\'ler ProxyLab\'e girer; Instagram/WhatsApp gibi diğerleri doğrudan internete çıkar. Mac ve cihazdaki tüm VPN\'leri kapatın.</div>'+
+        '<div class="phones">'+pacPhone+'</div></div></div>'+
+      '<div class="step" id="ws5"><div class="sb">5</div><div class="sc"><b>5 · Otomatik (PAC) desteklenmiyorsa — Manuel proxy</b>'+
+        '<div class="sd">Nadiren PAC desteklenmez. O zaman manuel proxy gir: Sunucu = bu Mac\'in IP\'si, Port = <b>8888</b>.</div>'+
+        '<div class="path">'+manualPath+'<br>Sunucu: '+MAC_IP+' &nbsp;·&nbsp; Port: 8888</div>'+
+        '<div class="banner warn" style="margin-top:8px">Manuel modda <b>tüm</b> trafik ProxyLab\'den geçer — Kapsam (Focus) çalışmaz, pinned/QUIC uygulamalar kırılabilir. Mümkünse Otomatik (PAC) kullanın.</div>'+
+        '<div class="phones">'+manualPhone+'</div></div></div>',
+      '<div class="btn accent sm" id="modal-close">Kapat</div>')}
+
+  function openDeviceModal(kind){
+    var fn=DEVMODALS[kind];if(!fn)return;
+    $("#modal").innerHTML=fn();
+    $("#modal-layer").classList.add("show");
+    var x=$("#modal-x"),c=$("#modal-close");if(x)x.onclick=closeModal;if(c)c.onclick=closeModal;
+    var inst=$("#ds-install");if(inst)inst.onclick=function(){this.outerHTML='<span class="ca-ok">✓ kurulu</span>'};
+    var px=$("#ds-proxy");if(px)px.onclick=function(){this.textContent="Proxy Açık ✓";this.classList.remove("accent")};
+    var cp=$("#ws-copy");if(cp)cp.onclick=function(){this.textContent="Kopyalandı ✓"};
+  }
+  function closeModal(){$("#modal-layer").classList.remove("show");$("#modal").innerHTML=""}
+
+  /* ═══════════ FLOW REGISTRY ═══════════ */
+  // setup(): ekranı/modalı hazırla. steps: hotspot adımları.
+  var FLOWS={
+    "see":{label:"See",setup:function(){closeModal();showView("see");if(!streaming){resetSee();startStream()}},wait:520,steps:[
+      {sel:"#toolbar",title:"Üst araç çubuğu",body:"Sekmeler (See, Kurallar, Replay…), sağda System Proxy anahtarı ve Connect menüsü. See sekmesi canlı trafiği gösterir.",pad:6},
+      {sel:"#connect",title:"Cihazı bağla",body:"Connect menüsünden iOS Simulator, Android veya gerçek cihaz için CA'yı tek tıkla kurarsınız. (Soldaki ‘Cihaz Kurulumu’ akışları bunu adım adım anlatır.)",pad:4},
+      {sel:"#sysproxy",title:"System Proxy",body:"Bu Mac'in/simülatörün trafiğini ProxyLab'e yönlendirir. Sadece Mac/simülatör incelerken AÇIN; fiziksel telefon Wi-Fi proxy ile bağlıysa KAPALI bırakın.",act:function(){fakeConnect()},pad:4},
+      {sel:"#pop-domain",title:"Chip: Domain Filtresi (Kapsam)",body:"Chip'e tıkla → Kapsam'ı See'den çıkmadan aç/kapat. ‘Sadece şu domainler’ ile yalnız kendi API'ni yakala, domain ekle/çıkar. SSL Proxying List'in hızlı hâli.",act:function(){openPop("#chip-domain","#pop-domain")},pad:6},
+      {sel:"#pop-map",title:"Chip: Map (Yanıt Kuralları)",body:"Tanımlı yanıt kurallarını buradan tek tıkla aç/kapat — panele gitmeden. ‘Kurallar panelini aç’ ile tam editöre geçersin.",act:function(){openPop("#chip-map","#pop-map")},pad:6},
+      {sel:"#pop-bp",title:"Chip: Breakpoint'ler",body:"Tanımlı breakpoint'leri buradan hızlıca aç/kapat. ‘Breakpoint panelini aç’ ile düzenleyiciye geçersin.",act:function(){openPop("#chip-bp","#pop-bp")},pad:6},
+      {sel:".view[data-view='see'] .scroll .row",title:"Bir isteğe tıkla",body:"Her satır bir API çağrısıdır: method, host, path, durum kodu, boyut, süre. Renkli kod (yeşil 2xx, sarı 4xx, kırmızı 5xx) sorunu anında gösterir. Tıklayın →",act:function(){closePops();var f=scroll.querySelector(".row");if(f)openDetail(parseInt(f.getAttribute("data-i"),10))},pad:3},
+      {sel:"#detail",title:"Detay paneli",body:"Request/Response arası geçiş; Body, Headers, Raw ile gövdeyi JSON ağacı veya ham metin olarak incele.",pad:0},
+      {sel:"#ctxmenu",title:"Sağ tık: hızlı aksiyonlar",body:"Bir isteğe SAĞ TIKLA → See'den çıkmadan her şey: Kural/Breakpoint oluştur, Remote'a/Akışa gönder, Body'yi Format'ta aç, cURL kopyala, Kaydet, Diff işaretle, host'u Kapsam'a ekle.",keepCtx:true,act:function(){closePops();closeDetail();var row=scroll.querySelector(".row");if(row){var rc=row.getBoundingClientRect();openCtx(rc.left+70,rc.bottom-4,rows[parseInt(row.getAttribute("data-i"),10)])}},pad:6},
+      {sel:".ctxitem[data-act='rule']",title:"Kural / Breakpoint oluştur",body:"İlk iki aksiyon ilgili sekmeye geçer ve alanları o isteğin method/URL'siyle OTOMATİK doldurur — sıfırdan yazmazsın. ‘Remote'a Gönder’ ve ‘Format'ta Aç’ da aynı mantıkla çalışır.",keepCtx:true,pad:3},
+      {sel:".ctxitem[data-act='save']",title:"Kaydet → kalıcı saklama",body:"‘Kaydet’ isteği Kaydedilenler'e kalıcı olarak saklar. Şimdi kaydedip sonucu görelim →",keepCtx:true,pad:3},
+      {sel:".subtab[data-sub='saved']",title:"Kaydedilenler sekmesi",body:"İşte: kaydettiğin istek Kaydedilenler'e düştü, sayaç arttı. Bu liste kalıcıdır — uygulama kapanınca silinmez, dışa aktarıp ekiple paylaşabilirsin.",act:function(){ctxAction("save")},pad:4},
+      {sel:"#statusbar",title:"Durum çubuğu",body:"Toplam istek, eşleşen kural/breakpoint sayısı, aktif hedef cihaz ve CA güven durumu burada özetlenir.",act:function(){closePops();showSub("all")},pad:4}
+    ]},
+    "rules":{label:"Kurallar",setup:function(){closeModal();showView("rules")},wait:200,steps:[
+      {sel:"#rules-new",title:"Yeni kural",body:"Map Local: eşleşen isteğe sunucuya hiç gitmeden kendi yazdığın yanıtı döndürürsün. Backend hazır olmadan UI geliştirmenin en hızlı yolu.",pad:4},
+      {sel:".view[data-view='rules'] .pside-list .litem",title:"Kural listesi",body:"Her kural bir anahtarla açılıp kapanır. Durum kodu (200/500), ad ve eşleşen method/URL deseni görünür. Pasif kurallar soluktur.",pad:4},
+      {sel:"#rules-editor .sect:nth-child(2)",title:"1 · Eşleşme koşulu",body:"Hangi isteklerin yakalanacağı: URL deseni (* joker) ve metod. Örn. POST /api/auth/login.",pad:4},
+      {sel:"#rules-editor .sect:nth-child(3)",title:"2 · Dönecek yanıt",body:"Sunucu yerine dönecek HTTP mesajı — durum kodu, header'lar ve gövde. İstersen gecikme (ms) ekleyip yavaş ağ simüle edebilirsin.",pad:4}
+    ]},
+    "bp":{label:"Breakpoint'ler",setup:function(){closeModal();showView("bp")},wait:200,steps:[
+      {sel:"#bp-paused",title:"Duraklatılmış istek",body:"Breakpoint eşleşince istek (REQ) veya yanıt (RES) burada durdurulur — sunucuya/uygulamaya henüz ulaşmadan. Kırmızı nokta canlı duraklamayı gösterir.",pad:4},
+      {sel:".view[data-view='bp'] .pside-list .litem:last-child",title:"Breakpoint kuralları",body:"Hangi URL/metod kombinasyonlarının duraklatılacağını tanımlarsın. Anahtarla aç/kapat.",pad:4},
+      {sel:"#bp-editor .field",title:"İsteği düzenle",body:"Duraklatılan isteğin header ve gövdesini elle değiştirebilirsin — token, parametre, body alanları.",pad:4},
+      {sel:"#bp-send",title:"Düzenleyip gönder",body:"Değişikliklerinle isteği sunucuya gönder, ya da tamamen iptal et. Edge-case'leri canlı test etmenin yolu.",pad:4}
+    ]},
+    "ssl":{label:"SSL Proxying List",setup:function(){closeModal();showView("ssl")},wait:200,steps:[
+      {sel:"#ssl-banner",title:"Kapsam (Focus) nedir?",body:"ProxyLab'in hangi domainlere dokunacağını sınırlar. Pinning yapan uygulamaların kırılmasını ve listenin gürültüyle dolmasını önler.",pad:4},
+      {sel:"#ssl-modes",title:"Yakalama modu",body:"‘Tüm trafik’ her şeyi MITM eder. ‘Sadece şu domainler’ ise yalnız kendi API'ni yakalar, gerisini doğrudan geçirir — fiziksel cihazda PAC ile birlikte şarttır.",pad:4},
+      {sel:"#ssl-include",title:"Odak listesi",body:"Yakalanacak domainleri ekle (örn. api.example.com). Listede olmayan her host doğrudan internete çıkar; Instagram, WhatsApp etkilenmez.",pad:4}
+    ]},
+    "remote":{label:"Remote",setup:function(){closeModal();showView("remote")},wait:200,steps:[
+      {sel:"#remote-line",title:"İstek oluştur",body:"Method, URL, header ve gövdeyi elle yazıp sunucuya istek gönder — yerleşik bir istek oluşturucu (Postman benzeri). Backend'i uygulama olmadan denemenin yolu.",pad:4},
+      {sel:".view[data-view='remote'] .pside-list",title:"Kayıtlı istekler",body:"Sık kullandığın istekleri kaydedip gruplara ayırabilirsin; tek tıkla geri yükle.",pad:4},
+      {sel:"#remote-send",title:"Gönder",body:"İsteği gönder; yanıt aşağıda durum kodu, süre ve gövdeyle görünür. ⌘↵ kısayolu da çalışır.",pad:4},
+      {sel:"#remote-resp",title:"Yanıt",body:"Dönen yanıtı JSON ağacı olarak incele. İpucu: See'de bir isteğe sağ tıklayıp ‘Remote'a Gönder’ dersen tüm alanlar buraya otomatik dolar.",pad:4}
+    ]},
+    "replay":{label:"Replay",setup:function(){closeModal();showView("replay");showRsub("mocks")},wait:200,steps:[
+      {sel:"#replay-subtabs",title:"Mock & Karşılaştır",body:"Replay iki şey sunar: API yanıtlarının anlık görüntüsü (Snapshot) ve aynı servisin iki çağrısını yan yana karşılaştırma (Diff).",act:function(){showRsub("mocks")},pad:4},
+      {sel:"#replay-rec",title:"Snapshot kaydet / içe aktar",body:"‘● Kaydet’ ile canlı trafiği bir snapshot'a alırsın; ‘İçe Aktar’ ile başkasının snapshot'ını yüklersin. Aktif snapshot eşleşen isteklere sunucuya gitmeden yanıt verir.",pad:4},
+      {sel:"#replay-main .banner",title:"Etkinleştir",body:"Snapshot aktifken eşleşen istekler kayıttan yanıtlanır — çevrimdışı, deterministik test. Üstte yeşil ‘Mock Aktif’ rozeti görünür.",pad:4},
+      {sel:"#snap-export",title:"Dışa / İçe Aktar (JSON)",body:"Snapshot'ı JSON olarak dışa aktarıp ekiple paylaş; ‘İçe Aktar’ ile geri yükle. Mock'lar repoya/PR'a taşınabilir.",act:function(){var b=$("#snap-export");if(b)b.click()},pad:4},
+      {sel:"#snap-pdf",title:"PDF olarak indir",body:"Snapshot ve endpoint'lerini PDF rapor olarak indir — dokümantasyon veya paylaşım için.",act:function(){var b=$("#snap-pdf");if(b)b.click()},pad:4},
+      {sel:"#replay-subtabs .subtab[data-rsub='compare']",title:"Karşılaştır (Diff) sekmesi",body:"Şimdi Karşılaştır'a geçelim — aynı endpoint'in iki farklı yanıtını yan yana diff'leyen ekran.",act:function(){showRsub("compare")},pad:4},
+      {sel:".diffcols",title:"Aynı servisin farkları",body:"İki çağrı yan yana: değişen alanlar sarı, eklenenler yeşil, silinenler kırmızı vurgulanır. ‘API ne zaman / neyi değiştirdi?’ sorusunun yanıtı. See'de iki yanıta sağ tık → Diff A / Diff B ile de açılır.",pad:6}
+    ]},
+    "format":{label:"Format",setup:function(){closeModal();showView("format");fmtRun()},wait:200,steps:[
+      {sel:"#fmt-in",title:"JSON girişi",body:"Herhangi bir JSON'u yapıştır — minified, kaçışlı, karışık. Nesne, dizi ve iç içe yapıları destekler.",pad:4},
+      {sel:"#fmt-go",title:"Formatla",body:"Tek tıkla okunabilir, renklendirilmiş ve girintili çıktıya çevirir; geçersizse hatayı gösterir.",pad:4},
+      {sel:"#fmt-out",title:"Formatlanmış çıktı",body:"Sözdizimi renklendirmesiyle ağaç görünümü. Detay panelindeki gövdeleri de aynı motor renklendirir.",pad:6}
+    ]},
+    "settings":{label:"Settings",setup:function(){closeModal();showView("settings")},wait:200,steps:[
+      {sel:"#set-port",title:"Port",body:"Proxy sunucusunun dinlediği port (varsayılan 8888). Cihazları bu porta yönlendirirsin.",pad:4},
+      {sel:"#set-ca",title:"Sertifika (CA)",body:"HTTPS çözümünün temeli. Bu Mac'te ve hedef cihazda güvenilir olmalı; durumu burada görünür.",pad:4},
+      {sel:"#set-guard",title:"İnternet bağlantısı koruması",body:"System Proxy'yi kapattıktan sonra internet kesilirse, eski bir yönlendirme kalmıştır — ‘Ayarlarımı düzelt’ ile temizlersin.",pad:4},
+      {sel:"#set-update",title:"Güncellemeler",body:"Yeni sürümleri GitHub üzerinden denetler, indirir ve yeniden başlatır.",pad:4},
+      {sel:"#set-reset",title:"Sıfırla (tehlikeli)",body:"Tüm trafiği, kuralları, snapshot'ları ve ayarları kalıcı siler. Geri alınamaz.",pad:6}
+    ]},
+
+    /* ───── Cihaz kurulum akışları ───── */
+    "dev:iossim":{label:"iOS Simulator",setup:function(){showView("see");openDeviceModal("iossim")},wait:260,steps:[
+      {sel:"#connect",title:"1 · Connect menüsü",body:"Gerçek uygulamada sağ üstteki Connect → ‘iOS Simulator için CA Yükle’ seçilir. (Modal açıldı.)",pad:4},
+      {sel:"#ds-warn",title:"2 · İki adım gerekli",body:"Simulator, Mac'in ağ yığınını kullanır: önce CA yüklenir (TLS güveni), sonra System Proxy AÇILIR.",pad:4},
+      {sel:"#ds-target",title:"3 · Simulator seç",body:"Çalışan (booted) simulator'lar listelenir. Hedef cihazı seçip CA'yı kurarsın; ProxyLab simulator'ı yeniden başlatır.",act:function(){var i=$("#ds-install");if(i)i.click()},pad:4},
+      {sel:"#sysproxy",title:"4 · System Proxy'yi aç",body:"Son adım: araç çubuğundan System Proxy'yi AÇ. Artık simulator trafiği listede görünür.",act:function(){closeModal();fakeConnect()},pad:4}
+    ]},
+    "dev:iphone":{label:"iPhone (Wi-Fi)",setup:function(){showView("see");openDeviceModal("iphone")},wait:260,steps:[
+      {sel:"#connect",title:"Connect → iPhone",body:"Sağ üst Connect → ‘iPhone (Gerçek Cihaz)’. Cihaz ve Mac aynı Wi-Fi'da olmalı. 4 adımlı rehber açılır.",pad:4},
+      {sel:"#ws1",title:"Adım 1 · Mac'e CA",body:"Kök sertifika önce bu Mac'in anahtar zincirinde güvenilir olmalı. (Burada zaten yüklü ✓.)",pad:4},
+      {sel:"#ws2",title:"Adım 2 · Cihaza indir",body:"iPhone'da QR'ı tara; QR okunmazsa adresi Safari'nin adres çubuğuna ELLE yaz. (Ekrandaki IP örnektir — uygulamadaki gerçek adresi kullan.) Profil iner; bunu proxy'den ÖNCE yap.",pad:4},
+      {sel:"#ws3",title:"Adım 3 · Yükle & güven",body:"Ayarlar → VPN ve Aygıt Yönetimi'nden profili yükle, sonra Sertifika Güveni Ayarları'ndan ProxyLab CA'yı AÇ.",pad:4},
+      {sel:"#ws4",title:"Adım 4 · PAC proxy (EN SON)",body:"Wi-Fi → Proxy Yapılandır → Otomatik, PAC URL'ini gir. Sertifikadan önce açarsan HTTPS kırılır. Kapsam dışı uygulamalar doğrudan geçer. (Aşağıda iOS proxy ekranının taklidi var.)",pad:4},
+      {sel:"#ws5",title:"Adım 5 · Manuel (PAC olmazsa)",body:"Nadiren Otomatik desteklenmez. O zaman Manuel proxy: Sunucu = bu Mac'in IP'si, Port 8888. Dikkat: manuel modda TÜM trafik proxy'den geçer, Kapsam (Focus) çalışmaz.",pad:4}
+    ]},
+    "dev:androidusb":{label:"Android (Emülatör/USB)",setup:function(){showView("see");openDeviceModal("androidusb")},wait:260,steps:[
+      {sel:"#connect",title:"Connect → Android (adb)",body:"Bu akış adb üzerinden çalışır. EMÜLATÖR için USB kablo gerekmez — Android Studio'da açıkken otomatik bulunur. FİZİKSEL cihaz için USB Hata Ayıklama'yı açıp USB ile bağla. Sonra Connect → ‘Android (USB / adb)’.",pad:4},
+      {sel:"#ds-target",title:"Cihaz listesi",body:"adb ile bulunan hedefler listelenir: EMÜLATÖR (USB gerekmez) ve FİZİKSEL · USB rozetiyle. adb yoksa veya cihaz görünmezse Wi-Fi akışını (soldaki ‘Android (Wi-Fi)’) kullanabilirsin.",pad:4},
+      {sel:"#ds-install",title:"CA yükle",body:"‘CA Yükle’ adb ile sertifikayı cihaza otomatik kurar. Emülatörde sistem deposuna yazılır (tüm uygulamalar güvenir).",act:function(){var i=$("#ds-install");if(i)i.click()},pad:4},
+      {sel:"#ds-proxy",title:"Proxy'yi aç",body:"‘Proxy'yi Aç’ cihazın proxy ayarını adb ile ProxyLab'e yönlendirir — elle ayar gerekmez. Trafik akmaya başlar.",act:function(){var p=$("#ds-proxy");if(p)p.click()},pad:4}
+    ]},
+    "dev:androidwifi":{label:"Android (Wi-Fi)",setup:function(){showView("see");openDeviceModal("androidwifi")},wait:260,steps:[
+      {sel:"#connect",title:"Connect → Android (Wi-Fi)",body:"adb olmadan, aynı Wi-Fi üzerinden. Connect → ‘Android (Gerçek Cihaz)’. 4 adımlı rehber açılır.",pad:4},
+      {sel:"#ws1",title:"Adım 1 · Mac'e CA",body:"Kök sertifika bu Mac'te güvenilir olmalı (Bölüm 2). Burada yüklü ✓.",pad:4},
+      {sel:"#ws2",title:"Adım 2 · Chrome ile indir",body:"Android'de QR'ı tara; QR okunmazsa adresi Chrome'un adres çubuğuna ELLE yaz. (Ekrandaki IP örnektir — uygulamadaki gerçek adresi kullan.) ca.crt iner; proxy'den ÖNCE indir.",pad:4},
+      {sel:"#ws3",title:"Adım 3 · Yükle & güven",body:"Ayarlar → Güvenlik → Sertifika yükle → CA sertifikası → inen ca.crt'yi seç. Android 7+'da kullanıcı CA'sı sınırlıdır.",pad:4},
+      {sel:"#ws4",title:"Adım 4 · PAC proxy (EN SON)",body:"Wi-Fi → Gelişmiş → Proxy Otomatik Yapılandırma, PAC URL'ini gir. Kapsam dışı uygulamalar doğrudan geçer. (Aşağıda Android proxy ekranının taklidi var.)",pad:4},
+      {sel:"#ws5",title:"Adım 5 · Manuel (PAC olmazsa)",body:"Otomatik desteklenmezse Manuel: Ana bilgisayar = bu Mac'in IP'si, Port 8888. Dikkat: manuel modda TÜM trafik proxy'den geçer, Kapsam (Focus) çalışmaz.",pad:4}
+    ]}
+  };
+
+  /* ═══════════ Flowbar render ═══════════ */
+  var UI_FLOWS=[
+    ["see","👁","See","Canlı trafik + sağ tık"],["rules","⊟","Kurallar","Map Local yanıt"],
+    ["bp","⏸","Breakpoint'ler","Durdur & düzenle"],["ssl","🔒","SSL Proxying List","Kapsam / Focus"],
+    ["remote","⇅","Remote","İstek oluşturucu"],
+    ["replay","↺","Replay","Mock & Diff"],["format","{ }","Format","JSON inceleyici"],["settings","⚙","Settings","Ayarlar"]
+  ];
+  var DEV_FLOWS=[
+    ["dev:iossim","📱","iOS Simulator","Tek tık CA"],["dev:iphone","🍎","iPhone (Wi-Fi)","5 adım + PAC"],
+    ["dev:androidusb","🔌","Android (Emülatör/USB)","adb ile otomatik"],["dev:androidwifi","🤖","Android (Wi-Fi)","5 adım + PAC"]
+  ];
+  function fbItem(f){return '<div class="fb-item" data-flow="'+f[0]+'"><span class="ic">'+f[1]+'</span><span class="tx"><b>'+f[2]+'</b><span>'+f[3]+'</span></span></div>'}
+  $("#ui-flows").innerHTML=UI_FLOWS.map(fbItem).join("");
+  $("#dev-flows").innerHTML=DEV_FLOWS.map(fbItem).join("");
+  $$(".fb-item").forEach(function(it){it.addEventListener("click",function(){startFlow(it.getAttribute("data-flow"))})});
+  function syncFlowbar(id){$$(".fb-item").forEach(function(x){x.classList.toggle("active",x.getAttribute("data-flow")===id)})}
+  $("#fb-collapse").addEventListener("click",function(){var fb=$("#flowbar");fb.classList.toggle("collapsed");this.textContent=fb.classList.contains("collapsed")?"⟩":"⟨";if(scrimOn)showStep()});
+
+  /* ═══════════ Tur motoru ═══════════ */
+  var curSteps=[],tIdx=0,scrimOn=false,curFlow=null;
+  function stageRect(){return $("#stage").getBoundingClientRect()}
+  function placeSpot(target,pad){pad=pad==null?6:pad;var st=stageRect();var r=target.getBoundingClientRect();
+    var x=r.left-st.left-pad,y=r.top-st.top-pad,w=r.width+pad*2,h=r.height+pad*2;
+    x=Math.max(2,x);y=Math.max(2,y);
+    var spot=$("#spot");spot.style.left=x+"px";spot.style.top=y+"px";spot.style.width=w+"px";spot.style.height=h+"px";
+    $("#veil").style.clipPath="polygon(0 0,100% 0,100% 100%,0 100%,0 "+y+"px,"+x+"px "+y+"px,"+x+"px "+(y+h)+"px,"+(x+w)+"px "+(y+h)+"px,"+(x+w)+"px "+y+"px,0 "+y+"px)";
+    var tip=$("#tip"),below=y+h+14,stH=$("#stage").clientHeight,stW=$("#stage").clientWidth;
+    tip.style.visibility="hidden";tip.style.left="0";tip.style.top="0";
+    var th=tip.offsetHeight,tw=tip.offsetWidth;
+    var ty=(below+th<stH-10)?below:Math.max(10,y-th-14);
+    if(ty<10)ty=10;if(ty+th>stH-10)ty=Math.max(10,stH-th-10);
+    var tx=Math.min(Math.max(10,x+w/2-tw/2),stW-tw-10);
+    tip.style.left=tx+"px";tip.style.top=ty+"px";tip.style.visibility="visible"}
+  function showStep(){var step=curSteps[tIdx];if(!step)return;if(!step.keepCtx)ctxmenu.classList.remove("show");var target=$(step.sel);
+    if(step.act)step.act();
+    setTimeout(function(){target=$(step.sel)||target;if(!target){nextStep();return;}
+      if(target.scrollIntoView)try{target.scrollIntoView({block:"nearest"})}catch(e){}
+      $("#tip-step").textContent="Adım "+(tIdx+1)+" / "+curSteps.length;
+      $("#tip-title").textContent=step.title;$("#tip-body").textContent=step.body;
+      $("#tip-prog").textContent=(tIdx+1)+"/"+curSteps.length;
+      $("#tip-next").textContent=tIdx===curSteps.length-1?"Bitir ✓":"İleri →";
+      placeSpot(target,step.pad)},step.act?340:30)}
+  function nextStep(){if(tIdx>=curSteps.length-1){endTour();return}tIdx++;showStep()}
+  function startFlow(id){var f=FLOWS[id];if(!f)return;stopAuto();$("#launch").classList.add("gone");
+    curFlow=id;syncFlowbar(id);if(f.setup)f.setup();
+    setTimeout(function(){curSteps=f.steps;tIdx=0;scrimOn=true;$("#scrim").classList.add("show");showStep()},f.wait||300)}
+  function endTour(){scrimOn=false;$("#scrim").classList.remove("show")}
+  $("#tip-next").addEventListener("click",nextStep);
+  $("#tip-skip").addEventListener("click",endTour);
+  $("#tour-toggle").addEventListener("click",function(){if(scrimOn){endTour()}else{startFlow(curFlow||"see")}});
+  window.addEventListener("resize",function(){if(scrimOn)showStep()});
+
+  /* ═══════════ Otomatik tur (video muadili) ═══════════ */
+  var autoOn=false,autoT=[];
+  function cap(t){$("#auto-cap").textContent=t}
+  function startAuto(){stopAuto();endTour();closeModal();showView("see");syncFlowbar("see");resetSee();
+    autoOn=true;$("#auto-pill").classList.add("show");$("#auto-toggle").textContent="⏸ Otomatik durdur";
+    var seq=[
+      [0,function(){cap("Proxy başlatılıyor — cihaz bağlanıyor…");fakeConnect()}],
+      [2600,function(){cap("Canlı trafik akıyor — istekler listeleniyor")}],
+      [4200,function(){cap("Bir isteğe tıklanıyor…");var r=scroll.querySelector(".row");if(r)openDetail(parseInt(r.getAttribute("data-i"),10))}],
+      [6000,function(){cap("Response gövdesi inceleniyor");$$(".seg b").forEach(function(x){x.classList.remove("on")});$('.seg b[data-phase="res"]').classList.add("on");curPhase="res";curDt="body";$$("#dtabs span").forEach(function(x){x.classList.remove("on")});$('#dtabs span[data-dt="body"]').classList.add("on");renderDetail()}],
+      [8200,function(){cap("Headers sekmesine geçiliyor");$$("#dtabs span").forEach(function(x){x.classList.remove("on")});$('#dtabs span[data-dt="headers"]').classList.add("on");curDt="headers";renderDetail()}],
+      [10400,function(){cap("Hatalı bir yanıt (5xx) açılıyor");var bad=null;for(var i=rows.length-1;i>=0;i--){if(rows[i].s>=500){bad=i;break}}if(bad!=null){openDetail(bad);curPhase="res";curDt="body";$$(".seg b").forEach(function(x){x.classList.remove("on")});$('.seg b[data-phase="res"]').classList.add("on");$$("#dtabs span").forEach(function(x){x.classList.remove("on")});$('#dtabs span[data-dt="body"]').classList.add("on");renderDetail()}}],
+      [12800,function(){cap("Bir isteğe sağ tık → hızlı aksiyonlar");closeDetail();showView("see");syncFlowbar("see");var row=scroll.querySelector(".row");if(row){var rc=row.getBoundingClientRect();openCtx(rc.left+70,rc.bottom-4,rows[parseInt(row.getAttribute("data-i"),10)])}}],
+      [14800,function(){cap("‘Bundan Kural Oluştur’ — alanlar otomatik doldu");ctxAction("rule")}],
+      [17000,function(){cap("Remote — yerleşik istek oluşturucu");closeModal();showView("remote");syncFlowbar("remote")}],
+      [19200,function(){cap("Cihaz kurulumu: iPhone rehberi (5 adım)");showView("see");openDeviceModal("iphone")}],
+      [21800,function(){cap("Demo baştan başlıyor…");closeModal();ctxmenu.classList.remove("show");showView("see");syncFlowbar("see")}],
+      [23000,function(){if(autoOn)startAuto()}]
+    ];
+    seq.forEach(function(s){autoT.push(setTimeout(s[1],s[0]))})}
+  function stopAuto(){autoOn=false;autoT.forEach(clearTimeout);autoT=[];$("#auto-pill").classList.remove("show");$("#auto-toggle").textContent="▶ Otomatik Tur"}
+  $("#auto-stop").addEventListener("click",stopAuto);
+  $("#auto-toggle").addEventListener("click",function(){if(autoOn){stopAuto()}else{startAuto()}});
+
+  /* ═══════════ Launch ═══════════ */
+  $("#start-free").addEventListener("click",function(){$("#launch").classList.add("gone");showView("see");syncFlowbar("see");startStream()});
+  $("#start-tour").addEventListener("click",function(){startFlow("see")});
+  $("#start-auto").addEventListener("click",function(){$("#launch").classList.add("gone");startAuto()});
+
+})();
+</script>
+</body>
+</html>
