@@ -277,9 +277,84 @@
   .mock-badge{font-size:9px;font-weight:700;background:var(--accent-soft);color:var(--accent-text);border-radius:4px;padding:1px 6px;margin-left:2px}
   .src{font-size:10px;opacity:.85}
 
-  /* Detail panel */
-  .detail{width:0;flex-shrink:0;display:flex;flex-direction:column;background:var(--bg-secondary);border-left:1px solid var(--border);overflow:hidden;transition:width .22s ease}
-  .detail.open{width:48%;max-width:600px}
+  /* See — Sol host listesi (HostSidebar) */
+  .hostbar{width:212px;flex-shrink:0;display:flex;flex-direction:column;min-height:0;border-right:1px solid var(--border);background:var(--bg-secondary)}
+  .hostbar.collapsed{width:38px}
+  .hb-head{display:flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-bottom:1px solid var(--border);flex-shrink:0;
+    color:var(--text-faint);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+  .hb-head .hb-cnt{margin-left:auto;color:var(--text-muted);font-family:var(--mono);font-size:9.5px}
+  .hb-head .hb-col{cursor:pointer;color:var(--text-muted);font-size:12px;margin-left:auto}
+  .hostbar.collapsed .hb-head .hb-cnt,.hostbar.collapsed .hb-head .hb-lbl,.hostbar.collapsed .hb-list,.hostbar.collapsed .hb-foot{display:none}
+  .hostbar.collapsed .hb-head .hb-col{margin-left:0}
+  .hb-list{flex:1;overflow-y:auto;padding:4px 0}
+  .hb-empty{padding:14px 12px;color:var(--text-faint);font-size:10.5px;line-height:1.5}
+  .hb-host{user-select:none}
+  .hb-host .hh{display:flex;align-items:center;gap:5px;padding:4px 8px;font-family:var(--mono);font-size:11px;color:var(--text-secondary);border-left:2px solid transparent;cursor:pointer}
+  .hb-host .hh:hover{background:rgba(255,255,255,.04)}
+  .hb-host.sel .hh{background:var(--accent-wash);border-left-color:var(--accent);color:var(--text-primary)}
+  .hb-host .chev{font-size:8px;color:var(--text-faint);width:9px;flex-shrink:0;transition:transform .15s;text-align:center}
+  .hb-host.open .chev{transform:rotate(90deg)}
+  .hb-host .hn{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hb-host .hc{color:var(--text-faint);font-size:9.5px;flex-shrink:0}
+  .hb-paths{display:none}
+  .hb-host.open .hb-paths{display:block}
+  .hb-path{display:flex;align-items:center;gap:6px;padding:3px 8px 3px 24px;font-family:var(--mono);font-size:10.5px;color:var(--text-muted);cursor:default}
+  .hb-path:hover{background:rgba(255,255,255,.03);color:var(--text-secondary)}
+  .hb-path .pp{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hb-path .pc{color:var(--text-faint);font-size:9px;flex-shrink:0}
+  .hb-foot{padding:7px 10px;border-top:1px solid var(--border);flex-shrink:0;font-size:9.5px;color:var(--text-faint);display:flex;align-items:center;gap:8px}
+  .hb-clear{cursor:pointer;color:var(--cyan-bright);white-space:nowrap}
+  .hb-clear:hover{text-decoration:underline}
+  /* Host/path satırı içi aksiyon butonları (+ Odak / − Hariç tut · Map / Breakpoint) */
+  .hb-host-acts,.hb-path-acts{display:inline-flex;gap:3px;flex-shrink:0;opacity:0;transition:opacity .12s}
+  .hb-host .hh:hover .hb-host-acts,.hb-host.sel .hh .hb-host-acts{opacity:1}
+  .hb-path:hover .hb-path-acts{opacity:1}
+  .hbtn{position:relative;width:17px;height:17px;border-radius:4px;border:1px solid var(--border);background:var(--bg-input);
+    display:inline-flex;align-items:center;justify-content:center;font-size:11px;line-height:1;cursor:pointer;color:var(--text-muted);padding:0}
+  .hbtn.inc:hover{border-color:var(--accent);color:var(--accent-text);background:var(--accent-soft)}
+  .hbtn.exc:hover{border-color:var(--red);color:var(--red-bright);background:var(--red-bg)}
+  .hbtn.map:hover{border-color:var(--green);color:var(--green-bright);background:var(--green-bg)}
+  .hbtn.bp:hover{border-color:var(--amber);color:var(--amber-bright);background:var(--amber-bg)}
+  /* Hover ipucu balonu — butonun altına, sağ-yaslı ve satır kaydırmalı (dar panelde kesilmesin) */
+  .hbtn[data-tip]::after{content:attr(data-tip);position:absolute;top:calc(100% + 6px);right:0;
+    background:#15151b;color:var(--text-primary);border:1px solid var(--border);border-radius:6px;
+    padding:5px 9px;font-size:10px;font-weight:500;font-family:var(--sans);line-height:1.35;
+    width:max-content;max-width:172px;white-space:normal;text-align:left;pointer-events:none;opacity:0;
+    transform:translateY(-3px);transition:opacity .12s ease,transform .12s ease;z-index:60;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+  .hbtn[data-tip]:hover::after{opacity:1;transform:translateY(0)}
+  /* Kalıcı açıklama (legend) — host listesinin altında */
+  .hb-legend{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+  .hb-legend b{font-weight:700}
+  .hb-legend .li-inc{color:var(--accent-text)}
+  .hb-legend .li-exc{color:var(--red-bright)}
+
+  /* Trafik satırı aksiyonları (Map Local + Breakpoint) */
+  .c-act{width:56px;flex-shrink:0;display:flex;align-items:center;justify-content:flex-end;gap:4px}
+  .row .c-act{opacity:0;transition:opacity .12s}
+  .row:hover .c-act,.row.sel .c-act{opacity:1}
+  .lhead .c-act{padding-right:2px}
+  .rowbtn{width:20px;height:20px;border-radius:5px;border:1px solid var(--border);background:var(--bg-input);
+    display:flex;align-items:center;justify-content:center;font-size:11px;line-height:1;cursor:pointer;color:var(--text-muted)}
+  .rowbtn:hover{color:var(--text-primary)}
+  .rowbtn.map:hover{border-color:var(--green);color:var(--green-bright);background:var(--green-bg)}
+  .rowbtn.bp:hover{border-color:var(--amber);color:var(--amber-bright);background:var(--amber-bg)}
+
+  /* Detail panel — sağ veya alt yerleşim (DetailLayoutToggle ile) */
+  .see-main{flex:1;display:flex;flex-direction:row;min-width:0;min-height:0}
+  .see-main.bottom{flex-direction:column}
+  .detail{flex-shrink:0;display:flex;flex-direction:column;background:var(--bg-secondary);overflow:hidden;transition:width .22s ease,height .22s ease}
+  .see-main:not(.bottom) .detail{width:0;border-left:1px solid var(--border)}
+  .see-main:not(.bottom) .detail.open{width:48%;max-width:600px}
+  .see-main.bottom .detail{width:100%;height:0;border-top:1px solid var(--border)}
+  .see-main.bottom .detail.open{height:46%}
+  /* Toolbar: detay paneli yerleşim toggle'ı (sağ / alt) */
+  .layout-toggle{display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:7px;overflow:hidden;height:28px;flex-shrink:0}
+  .lt-cell{width:28px;height:100%;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:none;cursor:pointer;color:var(--text-muted);padding:0}
+  .lt-cell+.lt-cell{border-left:1px solid var(--border)}
+  .lt-cell:hover{color:var(--text-secondary)}
+  .lt-cell.active{background:var(--accent-soft);color:var(--accent-text)}
+  .lt-cell svg .fill{display:none}
+  .lt-cell.active svg .fill{display:block}
   .dhead{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
   .seg{display:flex;background:var(--bg-input);border-radius:6px;padding:2px;gap:2px}
   .seg b{font-weight:600;font-size:11.5px;padding:4px 12px;border-radius:4px;color:var(--text-muted);cursor:pointer}
@@ -353,6 +428,36 @@
   .banner.ok{border-color:var(--green);background:var(--green-bg);color:var(--green-bright)}
   .kbd{font-family:var(--mono);font-size:11px;background:var(--bg-input);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--text-secondary)}
   .danger-box{border:1px solid var(--red-bg);background:rgba(239,68,68,.05);border-radius:10px;padding:16px;max-width:640px}
+
+  /* ───────── Replay (Mock'lar) ───────── */
+  .rsub{display:flex;align-items:center;gap:2px;height:34px;flex-shrink:0;padding:0 10px;border-bottom:1px solid var(--border);background:var(--bg-primary)}
+  .rsub .rtab{font-size:12px;font-weight:600;color:var(--text-muted);padding:5px 12px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:6px}
+  .rsub .rtab:hover{color:var(--text-secondary);background:rgba(255,255,255,.04)}
+  .rsub .rtab.on{color:var(--text-primary);background:var(--accent-wash)}
+  .rsub .rtab .cnt{font-size:10px;font-family:var(--mono);color:var(--text-faint)}
+  .rpane{flex:1;min-height:0}
+  .replay-wrap{display:flex;flex-direction:column;height:100%;min-height:0;width:100%}
+
+  /* Mock snapshot — sağ panel (header + endpoint tablosu) */
+  .snaphead{display:flex;align-items:flex-start;gap:12px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+  .snaphead .si{flex:1;min-width:0}
+  .snaphead .si h2{margin:0;font-size:16px;font-weight:600;display:flex;align-items:center;gap:10px}
+  .snap-live{font-size:11px;font-weight:600;color:var(--green-bright);background:var(--green-bg);border-radius:5px;padding:2px 8px}
+  .snaphead .si .sm{font-size:11px;color:var(--text-muted);margin-top:5px;font-family:var(--mono)}
+  .snaphead .sbtns{display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
+  .eptable{margin-top:8px}
+  .ephead{display:flex;align-items:center;height:30px;padding:0 6px;border-bottom:1px solid var(--border);
+    color:var(--text-faint);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+  .eprow{display:flex;align-items:center;height:34px;padding:0 6px;border-bottom:1px solid var(--border)}
+  .eprow:hover{background:rgba(255,255,255,.03)}
+  .ep-m{width:60px;flex-shrink:0}
+  .ep-p{flex:1;min-width:0;font-family:var(--mono);font-size:11.5px;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:12px}
+  .ep-s{width:56px;flex-shrink:0;text-align:right;font-family:var(--mono);font-size:12px;font-weight:600;padding-right:14px}
+  .ep-a{width:64px;flex-shrink:0;text-align:right;color:var(--red-bright);font-size:11px;cursor:pointer}
+  .ep-a:hover{text-decoration:underline}
+  .snap-acts{margin-left:auto;display:flex;gap:12px;font-size:11px}
+  .snap-act{cursor:pointer}
+  .snap-act:hover{text-decoration:underline}
 
   /* Status bar */
   .statusbar{display:flex;align-items:center;height:28px;flex-shrink:0;background:var(--bg-primary);border-top:1px solid var(--border);padding:0 16px;gap:18px;font-size:9px;color:var(--text-muted)}
@@ -553,6 +658,14 @@
           <div class="right">
             <div class="toggle" id="sysproxy"><span class="sw"></span>System Proxy</div>
             <div class="btn" id="connect">🔌 Connect ▾</div>
+            <div class="layout-toggle" id="layout-toggle">
+              <button class="lt-cell active" data-layout="right" title="Detay paneli sağda">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><line x1="9.5" y1="2.5" x2="9.5" y2="13.5"/><rect class="fill" x="9.5" y="2.5" width="5" height="11" fill="currentColor" stroke="none"/></svg>
+              </button>
+              <button class="lt-cell" data-layout="bottom" title="Detay paneli altta">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><line x1="1.5" y1="9.5" x2="14.5" y2="9.5"/><rect class="fill" x="1.5" y="9.5" width="13" height="4" fill="currentColor" stroke="none"/></svg>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -600,12 +713,20 @@
         <div class="body">
 
           <!-- ===== SEE VIEW ===== -->
-          <div class="view show" data-view="see">
+          <div class="view show vrow" data-view="see">
+            <!-- Sol: host listesi (HostSidebar) -->
+            <div class="hostbar" id="hostbar">
+              <div class="hb-head"><span class="hb-lbl">Hosts</span><span class="hb-cnt" id="hb-cnt">0</span><span class="hb-col" id="hb-collapse" title="Daralt">⟨</span></div>
+              <div class="hb-list" id="hb-list"></div>
+              <div class="hb-foot" id="hb-foot"><span>Host'a tıkla → o host'a göre filtrele</span></div>
+            </div>
+            <div class="see-main" id="see-main">
             <div class="list-col">
               <div class="lhead">
                 <div class="c-method" style="padding-left:0">METHOD</div>
                 <div class="c-host">HOST</div><div class="c-path">PATH</div>
                 <div class="c-time">ZAMAN</div><div class="c-size">BOYUT</div><div class="c-dur">SÜRE</div><div class="c-status">STATUS</div>
+                <div class="c-act">ACTION</div>
               </div>
               <div class="scroll" id="scroll"></div>
               <div class="scroll" id="saved-scroll" style="display:none">
@@ -621,6 +742,7 @@
               <div class="durl" id="durl"></div>
               <div class="dbody" id="dbody"></div>
             </div>
+            </div><!-- /see-main -->
             <div class="hero" id="hero">
               <div class="listen"><i></i>Dinleniyor — 192.168.1.50 : 8888 · PAC: 8889 <span style="color:var(--text-faint)">(örnek IP — sizde farklı olur)</span></div>
               <h1>iPhone, Android veya simülatörden gelen HTTPS trafiğini görün, değiştirin ve tekrar oynatın.</h1>
@@ -727,30 +849,48 @@ authorization: Bearer eyJhbGciOi…
               <div class="sect" style="max-width:640px">
                 <h4 style="margin-bottom:8px;color:var(--accent-text)">⃠ Her zaman hariç tut</h4>
                 <p class="d">ProxyLab bu domainlere hiç dokunmaz (banka, pinned servisler).</p>
-                <div class="dchips"><span class="dchip" style="background:rgba(255,255,255,.05);color:var(--text-secondary)">*.banka.com.tr <span class="x">×</span></span></div>
+                <div class="dchips" id="ssl-exclude-chips"><span class="dchip" style="background:rgba(255,255,255,.05);color:var(--text-secondary)">*.banka.com.tr <span class="x">×</span></span></div>
               </div>
             </div>
           </div>
 
-          <!-- ===== REPLAY VIEW (Mock & Akış) ===== -->
+          <!-- ===== REPLAY VIEW (Mock Snapshots) ===== -->
           <div class="view" data-view="replay">
-            <div class="pane" id="replay-mocks">
-              <div class="pside">
-                <div class="pside-head" id="replay-rec"><h3>Mock Snapshots</h3><div style="display:flex;gap:6px"><div class="btn sm" id="snap-import">⬆ İçe Aktar</div><div class="btn sm" id="snap-compare">⇄ Karşılaştır</div><div class="btn green sm">● Kaydet</div></div></div>
-                <div class="pside-list" id="replay-list">
-                  <div class="litem lstripe sel"><div class="lt"><b>Login + Feed (offline)</b></div><div class="lsub" style="font-family:var(--sans);color:var(--green-bright)">● Aktif · 6 endpoint · 17.06.2026</div></div>
-                  <div class="litem"><div class="lt"><b>Android — Login Flow</b></div><div class="lsub" style="font-family:var(--sans)">5 endpoint · 16.06.2026</div></div>
-                  <div class="litem"><div class="lt"><b>iOS — Login Flow</b></div><div class="lsub" style="font-family:var(--sans)">4 endpoint · 16.06.2026</div></div>
-                  <div class="litem"><div class="lt"><b>Ödeme akışı v2</b></div><div class="lsub" style="font-family:var(--sans)">4 endpoint · 14.06.2026</div></div>
+            <div class="replay-wrap">
+              <!-- Tek sekme: Mock'lar -->
+              <div class="rsub" id="rsub"><div class="rtab on">Mock'lar</div></div>
+
+              <div class="rpane" id="rpane-mocks">
+                <div class="pane" id="replay-mocks">
+                  <div class="pside" style="width:344px">
+                    <div class="pside-head" id="replay-rec"><h3>Mock Snapshots</h3><div class="btn green sm" id="snap-new">+ Yeni</div></div>
+                    <div style="display:flex;gap:8px;padding:10px 14px 6px">
+                      <div class="btn sm" id="snap-import" style="flex:1;justify-content:center">⬇ Import JSON</div>
+                      <div class="btn sm" id="snap-compare" style="flex:1;justify-content:center">⇄ Karşılaştır</div>
+                    </div>
+                    <div class="pside-list" id="replay-list">
+                      <div class="litem sel"><div class="lt"><b>Login + Feed (offline)</b><span class="snap-acts"><span class="snap-act" style="color:var(--cyan-bright)">Activate</span><span class="snap-act" style="color:var(--red-bright)">Delete</span></span></div><div class="lsub" style="font-family:var(--sans)">17.06.2026 02:09 · <span style="color:var(--cyan-bright)">6 endpoints</span></div></div>
+                      <div class="litem"><div class="lt"><b>Android — Login Flow</b><span class="snap-acts"><span class="snap-act" style="color:var(--cyan-bright)">Activate</span><span class="snap-act" style="color:var(--red-bright)">Delete</span></span></div><div class="lsub" style="font-family:var(--sans)">16.06.2026 18:40 · <span style="color:var(--cyan-bright)">5 endpoints</span></div></div>
+                      <div class="litem"><div class="lt"><b>iOS — Login Flow</b><span class="snap-acts"><span class="snap-act" style="color:var(--cyan-bright)">Activate</span><span class="snap-act" style="color:var(--red-bright)">Delete</span></span></div><div class="lsub" style="font-family:var(--sans)">16.06.2026 18:38 · <span style="color:var(--cyan-bright)">4 endpoints</span></div></div>
+                      <div class="litem"><div class="lt"><b>Ödeme akışı v2</b><span class="snap-acts"><span class="snap-act" style="color:var(--cyan-bright)">Activate</span><span class="snap-act" style="color:var(--red-bright)">Delete</span></span></div><div class="lsub" style="font-family:var(--sans)">14.06.2026 11:02 · <span style="color:var(--cyan-bright)">4 endpoints</span></div></div>
+                    </div>
+                  </div>
+                  <div class="pmain" id="replay-main">
+                    <div class="snaphead">
+                      <div class="si"><h2>Login + Feed (offline) <span class="snap-live">● Aktif</span></h2><div class="sm">6 endpoints · Created: 17.06.2026 02:09:14</div></div>
+                      <div class="sbtns"><div class="btn green sm" id="snap-activate">Mock Etkinleştir</div><div class="btn sm" id="snap-export" style="color:var(--blue-bright)">JSON Dışa Aktar</div><div class="btn sm" style="color:var(--red-bright)">Delete</div></div>
+                    </div>
+                    <div class="eptable">
+                      <div class="ephead"><div class="ep-m">METHOD</div><div class="ep-p">PATH</div><div class="ep-s">STATUS</div><div class="ep-a">ACTIONS</div></div>
+                      <div class="eprow"><div class="ep-m"><span class="method-tag" style="color:var(--green-bright)">POST</span></div><div class="ep-p">https://api.market.app/v1/auth/login</div><div class="ep-s" style="color:var(--green-bright)">200</div><div class="ep-a">Delete</div></div>
+                      <div class="eprow"><div class="ep-m"><span class="method-tag" style="color:var(--text-secondary)">GET</span></div><div class="ep-p">https://api.market.app/v1/users/me</div><div class="ep-s" style="color:var(--green-bright)">200</div><div class="ep-a">Delete</div></div>
+                      <div class="eprow"><div class="ep-m"><span class="method-tag" style="color:var(--text-secondary)">GET</span></div><div class="ep-p">https://api.market.app/v1/feed?page=1&amp;limit=20</div><div class="ep-s" style="color:var(--green-bright)">200</div><div class="ep-a">Delete</div></div>
+                      <div class="eprow"><div class="ep-m"><span class="method-tag" style="color:var(--text-secondary)">GET</span></div><div class="ep-p">https://cdn.market.app/avatars/8842.webp</div><div class="ep-s" style="color:var(--green-bright)">200</div><div class="ep-a">Delete</div></div>
+                      <div class="eprow"><div class="ep-m"><span class="method-tag" style="color:var(--text-secondary)">GET</span></div><div class="ep-p">https://api.market.app/v1/products/302</div><div class="ep-s" style="color:var(--green-bright)">200</div><div class="ep-a">Delete</div></div>
+                      <div class="eprow"><div class="ep-m"><span class="method-tag" style="color:var(--green-bright)">POST</span></div><div class="ep-p">https://api.market.app/v1/payments/checkout</div><div class="ep-s" style="color:var(--red-bright)">500</div><div class="ep-a">Delete</div></div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div class="pmain" id="replay-main">
-                <div class="banner ok">● <b>Mock Aktif:</b> “Login + Feed (offline)” — eşleşen istekler sunucuya gitmeden snapshot'tan yanıtlanır.</div>
-                <h4 style="margin:4px 0 10px;font-size:13px">Snapshot endpoint'leri</h4>
-                <div class="litem"><div class="lt"><span class="pill g">200</span><span class="method-tag" style="color:var(--green-bright)">POST</span><b style="font-family:var(--mono);font-weight:500">/api/auth/login</b></div></div>
-                <div class="litem"><div class="lt"><span class="pill g">200</span><span class="method-tag" style="color:var(--text-secondary)">GET</span><b style="font-family:var(--mono);font-weight:500">/v1/users/me</b></div></div>
-                <div class="litem"><div class="lt"><span class="pill g">200</span><span class="method-tag" style="color:var(--text-secondary)">GET</span><b style="font-family:var(--mono);font-weight:500">/v1/feed?page=1</b></div></div>
-                <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><div class="btn">Mock Etkinleştir</div><div class="btn" id="snap-compare2">⇄ Karşılaştır</div><div class="btn" id="snap-export">⬇ JSON Dışa Aktar</div><div class="btn" id="snap-pdf">📄 PDF</div></div>
               </div>
             </div>
           </div>
@@ -876,7 +1016,6 @@ content-type: application/json</textarea></div>
           <div class="ctxitem accent" data-act="rule"><span class="ci">⊟</span>Bundan Kural Oluştur</div>
           <div class="ctxitem accent" data-act="bp"><span class="ci">⏸</span>Buraya Breakpoint Ekle</div>
           <div class="ctxitem" data-act="remote"><span class="ci">⇅</span>Remote'a Gönder</div>
-          <div class="ctxitem" data-act="flow"><span class="ci">↺</span>Akışa Ekle</div>
           <div class="ctxitem" data-act="format"><span class="ci">{ }</span>Body'yi Format'ta Aç</div>
           <div class="ctxsep"></div>
           <div class="ctxitem" data-act="curl"><span class="ci">⌘</span>cURL Olarak Kopyala</div>
@@ -1000,23 +1139,74 @@ content-type: application/json</textarea></div>
     var keys=Object.keys(v);if(!keys.length)return "{}";
     return "{\n"+keys.map(function(k){return pad1+'<span class="k">"'+esc(k)+'"</span>: '+jsonHtml(v[k],ind+1)}).join(",\n")+"\n"+pad+"}"}
   function rowHtml(r,i){var mc=METHOD_COLOR[r.m]||"#a1a1aa";
-    return '<div class="row new" data-i="'+i+'"><div class="stripe" style="background:'+mc+'"></div>'+
+    return '<div class="row new" data-i="'+i+'" data-h="'+esc(r.h)+'"><div class="stripe" style="background:'+mc+'"></div>'+
       '<div class="c-method"><span class="src">🖥</span><span class="m" style="color:'+mc+'">'+r.m+'</span></div>'+
       '<div class="c-host">'+esc(r.h)+(r.mock?'<span class="mock-badge">MOCK</span>':'')+'</div>'+
       '<div class="c-path">'+esc(r.p)+'</div><div class="c-time">'+r.clock+'</div>'+
       '<div class="c-size">'+fmtBytes(r.sz)+'</div><div class="c-dur">'+fmtDur(r.d)+'</div>'+
-      '<div class="c-status" style="color:'+statusColor(r.s)+'">'+r.s+'</div></div>'}
+      '<div class="c-status" style="color:'+statusColor(r.s)+'">'+r.s+'</div>'+
+      '<div class="c-act"><span class="rowbtn map" data-act="rule" title="Map Local — bu isteğe mock yanıt yaz">⊟</span>'+
+      '<span class="rowbtn bp" data-act="bp" title="Breakpoint ekle — isteği duraklat">⏸</span></div></div>'}
   function pushRow(){var base=SEED[seedIdx%SEED.length];seedIdx++;var r=Object.assign({},base);r.clock=nowClock();
     rows.push(r);var i=rows.length-1;scroll.insertAdjacentHTML("afterbegin",rowHtml(r,i));
     count++;if(r.mock)matched++;if(r.s===401||r.s===500)matched++;
+    bumpHost(r);renderHosts();applyHostFilter();
     $("#sb-count").textContent=count;$("#cnt-all").textContent=count;$("#sb-matched").textContent=matched;
     if(count===1)hero.classList.add("gone");
     while(scroll.children.length>40)scroll.removeChild(scroll.lastChild)}
   function startStream(){if(streaming)return;streaming=true;$(".tab[data-tab='see']").classList.add("is-live");pushRow();streamTimer=setInterval(pushRow,900)}
   function stopStream(){streaming=false;if(streamTimer)clearInterval(streamTimer);streamTimer=null}
   function resetSee(){stopStream();rows=[];count=0;matched=0;seedIdx=0;scroll.innerHTML="";hero.classList.remove("gone");closeDetail();
+    hostMap={};activeHost=null;openHosts={};renderHosts();
     $("#scroll").style.display="";$("#saved-scroll").style.display="none";$$('.subtab[data-sub]').forEach(function(x){x.classList.toggle("active",x.getAttribute("data-sub")==="all")});
     $("#sb-count").textContent="0";$("#cnt-all").textContent="0";$("#sb-matched").textContent="0"}
+
+  /* ── See: sol host listesi (HostSidebar) ── */
+  var hostMap={},activeHost=null,openHosts={};
+  function hbPath(p){return (p||"/").split("?")[0]}
+  function bumpHost(r){var h=r.h,p=hbPath(r.p);if(!hostMap[h])hostMap[h]={count:0,paths:{}};
+    hostMap[h].count++;hostMap[h].paths[p]=(hostMap[h].paths[p]||0)+1}
+  function updateHbFoot(){var f=$("#hb-foot");if(!f)return;
+    if(activeHost)f.innerHTML='<span>Filtre: <b style="color:var(--text-secondary)">'+esc(activeHost)+'</b></span><span class="hb-clear" id="hb-clearbtn">temizle ×</span>';
+    else f.innerHTML='<span class="hb-legend"><b class="li-inc">＋</b> Odağa ekle &nbsp;·&nbsp; <b class="li-exc">−</b> Hariç tut</span>'}
+  function renderHosts(){var list=$("#hb-list");if(!list)return;var hosts=Object.keys(hostMap);
+    var c=$("#hb-cnt");if(c)c.textContent=hosts.length;
+    if(!hosts.length){list.innerHTML='<div class="hb-empty">Henüz host yok — trafik aktıkça burada birikir.</div>';updateHbFoot();return}
+    list.innerHTML=hosts.map(function(h){var d=hostMap[h],op=openHosts[h],seld=activeHost===h;
+      var ph=Object.keys(d.paths).map(function(p){return '<div class="hb-path" data-path="'+esc(p)+'" title="'+esc(p)+'"><span class="pp">'+esc(p)+'</span><span class="pc">'+d.paths[p]+'</span>'+
+        '<span class="hb-path-acts"><span class="hbtn map" data-pact="map" data-tip="Map Local — bu path\'e sahte yanıt yaz" title="Map Local — bu path\'e sahte yanıt yaz">⊟</span><span class="hbtn bp" data-pact="bp" data-tip="Breakpoint — bu path\'i duraklat" title="Breakpoint — bu path\'i duraklat">⏸</span></span></div>'}).join("");
+      return '<div class="hb-host'+(op?' open':'')+(seld?' sel':'')+'" data-host="'+esc(h)+'">'+
+        '<div class="hh"><span class="chev">▶</span><span class="hn">'+esc(h)+'</span><span class="hc">'+d.count+'</span>'+
+        '<span class="hb-host-acts"><span class="hbtn inc" data-hact="inc" data-tip="Odağa ekle — yalnız bu host\'u yakala" title="Odağa ekle — yalnız bu host\'u yakala (Include)">+</span><span class="hbtn exc" data-hact="exc" data-tip="Hariç tut — bu host\'a hiç dokunma" title="Hariç tut — bu host\'a hiç dokunma (Exclude)">−</span></span></div>'+
+        '<div class="hb-paths">'+ph+'</div></div>'}).join("");
+    updateHbFoot()}
+  function applyHostFilter(){$$("#scroll .row").forEach(function(el){
+    el.style.display=(!activeHost||el.getAttribute("data-h")===activeHost)?"":"none"})}
+  function addDchip(sel,host){var box=$(sel);if(!box)return false;
+    var dup=Array.prototype.some.call(box.querySelectorAll(".dchip"),function(c){return c.textContent.replace("×","").trim()===host});
+    if(dup)return false;
+    var s=document.createElement("span");s.className="dchip flash";s.innerHTML=esc(host)+' <span class="x">×</span>';box.appendChild(s);return true}
+  function addScope(host,kind){
+    if(kind==="inc"){var a1=addDchip("#ssl-include .dchips",host);
+      showToast(a1?"🎯 "+host+" → Odak (Include) listesine eklendi":"🎯 "+host+" zaten Odak listesinde")}
+    else{var a2=addDchip("#ssl-exclude-chips",host);
+      showToast(a2?"⃠ "+host+" → Hariç Tut (Exclude) listesine eklendi":"⃠ "+host+" zaten Hariç listesinde")}}
+  bindClick("#hb-collapse",function(){var hb=$("#hostbar");hb.classList.toggle("collapsed");this.textContent=hb.classList.contains("collapsed")?"⟩":"⟨"});
+  $("#hb-list").addEventListener("click",function(e){
+    var actBtn=e.target.closest(".hbtn");
+    if(actBtn){e.stopPropagation();var hostEl0=e.target.closest(".hb-host");var h0=hostEl0.getAttribute("data-host");
+      var ha=actBtn.getAttribute("data-hact"),pa=actBtn.getAttribute("data-pact");
+      if(ha==="inc")addScope(h0,"inc");
+      else if(ha==="exc")addScope(h0,"exc");
+      else if(pa){var pe=e.target.closest(".hb-path");var p=pe.getAttribute("data-path");
+        ctxRow={m:"GET",h:h0,p:p,s:200,reqH:{},reqB:null,resH:{},resB:{ok:true}};ctxAction(pa==="map"?"rule":"bp")}
+      return}
+    if(e.target.closest(".hb-path"))return;
+    var hostEl=e.target.closest(".hb-host");if(!hostEl)return;var h=hostEl.getAttribute("data-host");
+    if(e.target.closest(".chev")){openHosts[h]=!openHosts[h];renderHosts();return}
+    if(activeHost===h){activeHost=null}else{activeHost=h;openHosts[h]=true}renderHosts();applyHostFilter()});
+  $("#hb-foot").addEventListener("click",function(e){if(e.target.id==="hb-clearbtn"){activeHost=null;renderHosts();applyHostFilter()}});
+  renderHosts();
 
   var curRow=null,curPhase="req",curDt="body";
   function openDetail(i){curRow=rows[i];if(!curRow)return;$$(".row").forEach(function(el){el.classList.remove("sel")});
@@ -1037,7 +1227,10 @@ content-type: application/json</textarea></div>
       else html+='<div class="json" style="white-space:pre">'+jsonHtml(B)+'</div>'}
     body.innerHTML=html}
 
-  scroll.addEventListener("click",function(e){var row=e.target.closest(".row");if(!row)return;openDetail(parseInt(row.getAttribute("data-i"),10))});
+  scroll.addEventListener("click",function(e){var row=e.target.closest(".row");if(!row)return;
+    var btn=e.target.closest(".rowbtn");
+    if(btn){e.stopPropagation();ctxRow=rows[parseInt(row.getAttribute("data-i"),10)];ctxAction(btn.getAttribute("data-act"));return}
+    openDetail(parseInt(row.getAttribute("data-i"),10))});
 
   /* ── Sağ tık menüsü + See'den kural/breakpoint/remote canlandırması ── */
   var ctxmenu=$("#ctxmenu"),ctxRow=null;
@@ -1073,7 +1266,7 @@ content-type: application/json</textarea></div>
       '<div class="c-method"><span class="src">★</span><span class="m" style="color:'+mc+'">'+r.m+'</span></div>'+
       '<div class="c-host">'+esc(r.h)+'</div><div class="c-path">'+esc(r.p)+'</div>'+
       '<div class="c-time">'+(r.clock||nowClock())+'</div><div class="c-size">'+fmtBytes(r.sz||0)+'</div>'+
-      '<div class="c-dur">'+fmtDur(r.d||0)+'</div><div class="c-status" style="color:'+statusColor(r.s||200)+'">'+(r.s||200)+'</div></div>'}
+      '<div class="c-dur">'+fmtDur(r.d||0)+'</div><div class="c-status" style="color:'+statusColor(r.s||200)+'">'+(r.s||200)+'</div><div class="c-act"></div></div>'}
   function saveRow(r){savedItems.push(Object.assign({},r));var sc=$("#saved-scroll"),emp=$("#saved-empty");if(emp)emp.style.display="none";
     sc.insertAdjacentHTML("beforeend",savedRowHtml(r));var last=sc.lastChild;last.classList.add("flash");
     $("#cnt-saved").textContent=savedItems.length}
@@ -1106,7 +1299,6 @@ content-type: application/json</textarea></div>
     else if(act==="bp"){showView("bp");syncFlowbar("bp");prefillBp(r);showToast("✓ See → Breakpoint eklendi: "+rPath(r))}
     else if(act==="remote"){showView("remote");syncFlowbar("remote");prefillRemote(r);showToast("✓ See → Remote'a gönderildi")}
     else if(act==="format"){prefillFormat(r);showToast("✓ Body, Format (JSON) ekranında açıldı")}
-    else if(act==="flow")showToast("✓ Akışa eklendi");
     else if(act==="curl")showToast("✓ cURL panoya kopyalandı");
     else if(act==="save"){saveRow(r);showSub("saved");showToast("★ Kaydedildi → Kaydedilenler ("+savedItems.length+")")}
     else if(act==="diffA"){diffA=r;showToast("Ⓐ Diff A işaretlendi — ikinci isteğe sağ tık → ‘Diff B’")}
@@ -1125,6 +1317,11 @@ content-type: application/json</textarea></div>
     if(name==="format")fmtRun();
   }
   $$(".tab").forEach(function(t){t.addEventListener("click",function(){var n=t.getAttribute("data-tab");showView(n);syncFlowbar(n)})});
+
+  /* Detay paneli yerleşimi (sağ / alt) — DetailLayoutToggle */
+  function setDetailLayout(which){var sm=$("#see-main");if(sm)sm.classList.toggle("bottom",which==="bottom");
+    $$("#layout-toggle .lt-cell").forEach(function(b){b.classList.toggle("active",b.getAttribute("data-layout")===which)})}
+  $$("#layout-toggle .lt-cell").forEach(function(b){b.addEventListener("click",function(){setDetailLayout(b.getAttribute("data-layout"))})});
   $$(".subtab").forEach(function(t){t.addEventListener("click",function(){var p=t.parentNode;$$(".subtab",p).forEach(function(x){x.classList.remove("active")});t.classList.add("active");var sub=t.getAttribute("data-sub");if(sub)showSub(sub)})});
 
   /* Format */
@@ -1134,11 +1331,12 @@ content-type: application/json</textarea></div>
   /* SSL mode cards */
   $$("#ssl-modes .modecard").forEach(function(c){c.addEventListener("click",function(){$$("#ssl-modes .modecard").forEach(function(x){x.classList.remove("on")});c.classList.add("on");$("#ssl-include").style.display=c.getAttribute("data-mode")==="focus"?"":"none"})});
 
-  /* Replay — snapshot içe/dışa aktar + PDF */
+  /* Replay — snapshot içe/dışa aktar */
   function bindClick(sel,fn){var el=$(sel);if(el)el.addEventListener("click",fn)}
-  bindClick("#snap-import",function(){showToast("⬆ Snapshot içe aktarıldı (snapshot.json)")});
+  bindClick("#snap-import",function(){showToast("⬇ Snapshot içe aktarıldı (snapshot.json)")});
   bindClick("#snap-export",function(){showToast("⬇ Snapshot dışa aktarıldı → snapshot.json")});
-  bindClick("#snap-pdf",function(){showToast("📄 PDF indirildi → snapshot-raporu.pdf")});
+  bindClick("#snap-new",function(){showToast("+ Yeni snapshot kaydı başladı — uygulamada gezin, yanıtlar yakalanır")});
+  bindClick("#snap-activate",function(){showToast("● Mock etkinleştirildi — eşleşen istekler snapshot'tan yanıtlanır")});
 
   /* Snapshot karşılaştırma modal (MockComparePanel) — Android Login ↔ iOS Login */
   var MCMP={
@@ -1184,7 +1382,6 @@ content-type: application/json</textarea></div>
   function openMcmp(){mcmpFilter="differing";mcmpSel="login";mcmpSec="all";renderMcmp();$("#mcmp").classList.add("show")}
   function closeMcmp(){$("#mcmp").classList.remove("show")}
   bindClick("#snap-compare",openMcmp);
-  bindClick("#snap-compare2",openMcmp);
   bindClick("#mcmp-close",closeMcmp);
   bindClick("#mcmp-export",function(){showToast("📄 Karşılaştırma raporu indirildi (PDF / Markdown)")});
 
@@ -1350,9 +1547,11 @@ content-type: application/json</textarea></div>
       {sel:"#pop-domain",title:"Chip: Domain Filtresi (Kapsam)",body:"Chip'e tıkla → Kapsam'ı See'den çıkmadan aç/kapat. ‘Sadece şu domainler’ ile yalnız kendi API'ni yakala, domain ekle/çıkar. SSL Proxying List'in hızlı hâli.",act:function(){openPop("#chip-domain","#pop-domain")},pad:6},
       {sel:"#pop-map",title:"Chip: Map (Yanıt Kuralları)",body:"Tanımlı yanıt kurallarını buradan tek tıkla aç/kapat — panele gitmeden. ‘Kurallar panelini aç’ ile tam editöre geçersin.",act:function(){openPop("#chip-map","#pop-map")},pad:6},
       {sel:"#pop-bp",title:"Chip: Breakpoint'ler",body:"Tanımlı breakpoint'leri buradan hızlıca aç/kapat. ‘Breakpoint panelini aç’ ile düzenleyiciye geçersin.",act:function(){openPop("#chip-bp","#pop-bp")},pad:6},
+      {sel:"#hostbar",title:"Sol: Host listesi",body:"Gelen trafik host'lara göre gruplanır. Bir host'a tıkla → listeyi yalnız o host'a göre filtrele; ▶ oku aç → path'lerini gör. Host'un sağındaki ＋ o host'u Odak (Include) listesine ekler — yalnız onu yakalarsın; − ise Hariç Tut (Exclude) listesine ekler — ProxyLab o host'a hiç dokunmaz.",act:function(){closePops()},pad:4},
       {sel:".view[data-view='see'] .scroll .row",title:"Bir isteğe tıkla",body:"Her satır bir API çağrısıdır: method, host, path, durum kodu, boyut, süre. Renkli kod (yeşil 2xx, sarı 4xx, kırmızı 5xx) sorunu anında gösterir. Tıklayın →",act:function(){closePops();var f=scroll.querySelector(".row");if(f)openDetail(parseInt(f.getAttribute("data-i"),10))},pad:3},
+      {sel:".view[data-view='see'] .scroll .row.sel .c-act",title:"Satır içi hızlı aksiyon",body:"Her satırın sağında — üzerine gelince — ⊟ (Map Local: bu isteğe mock yanıt yaz) ve ⏸ (Breakpoint: isteği duraklat) butonları çıkar. Sağ tık menüsüne gitmeden tek tıkla kural/breakpoint oluşturursun.",act:function(){var f=scroll.querySelector(".row");if(f){f.classList.add("sel")}},pad:4},
       {sel:"#detail",title:"Detay paneli",body:"Request/Response arası geçiş; Body, Headers, Raw ile gövdeyi JSON ağacı veya ham metin olarak incele.",pad:0},
-      {sel:"#ctxmenu",title:"Sağ tık: hızlı aksiyonlar",body:"Bir isteğe SAĞ TIKLA → See'den çıkmadan her şey: Kural/Breakpoint oluştur, Remote'a/Akışa gönder, Body'yi Format'ta aç, cURL kopyala, Kaydet, Diff işaretle, host'u Kapsam'a ekle.",keepCtx:true,act:function(){closePops();closeDetail();var row=scroll.querySelector(".row");if(row){var rc=row.getBoundingClientRect();openCtx(rc.left+70,rc.bottom-4,rows[parseInt(row.getAttribute("data-i"),10)])}},pad:6},
+      {sel:"#ctxmenu",title:"Sağ tık: hızlı aksiyonlar",body:"Bir isteğe SAĞ TIKLA → See'den çıkmadan her şey: Kural/Breakpoint oluştur, Remote'a gönder, Body'yi Format'ta aç, cURL kopyala, Kaydet, Diff işaretle, host'u Kapsam'a ekle.",keepCtx:true,act:function(){closePops();closeDetail();var row=scroll.querySelector(".row");if(row){var rc=row.getBoundingClientRect();openCtx(rc.left+70,rc.bottom-4,rows[parseInt(row.getAttribute("data-i"),10)])}},pad:6},
       {sel:".ctxitem[data-act='rule']",title:"Kural / Breakpoint oluştur",body:"İlk iki aksiyon ilgili sekmeye geçer ve alanları o isteğin method/URL'siyle OTOMATİK doldurur — sıfırdan yazmazsın. ‘Remote'a Gönder’ ve ‘Format'ta Aç’ da aynı mantıkla çalışır.",keepCtx:true,pad:3},
       {sel:".ctxitem[data-act='save']",title:"Kaydet → kalıcı saklama",body:"‘Kaydet’ isteği Kaydedilenler'e kalıcı olarak saklar. Şimdi kaydedip sonucu görelim →",keepCtx:true,pad:3},
       {sel:".subtab[data-sub='saved']",title:"Kaydedilenler sekmesi",body:"İşte: kaydettiğin istek Kaydedilenler'e düştü, sayaç arttı. Bu liste kalıcıdır — uygulama kapanınca silinmez, dışa aktarıp ekiple paylaşabilirsin.",act:function(){ctxAction("save")},pad:4},
@@ -1384,10 +1583,10 @@ content-type: application/json</textarea></div>
       {sel:"#remote-resp",title:"Response",body:"Dönen yanıt durum kodu, süre ve gövdeyle görünür. Body'yi ‘Format’ ile güzelleştirebilirsin.",pad:4}
     ]},
     "replay":{label:"Replay",setup:function(){closeModal();closeMcmp();showView("replay")},wait:200,steps:[
-      {sel:"#replay-rec",title:"Snapshot kaydet / içe aktar",body:"‘● Kaydet’ ile canlı trafiği bir snapshot'a alırsın; ‘İçe Aktar’ ile başkasının snapshot'ını yüklersin. Aktif snapshot eşleşen isteklere sunucuya gitmeden yanıt verir.",pad:4},
-      {sel:"#replay-main .banner",title:"Etkinleştir",body:"Snapshot aktifken eşleşen istekler kayıttan yanıtlanır — çevrimdışı, deterministik test. Üstte yeşil ‘Mock Aktif’ rozeti görünür.",pad:4},
-      {sel:"#snap-export",title:"Dışa / İçe Aktar (JSON)",body:"Snapshot'ı JSON olarak dışa aktarıp ekiple paylaş; ‘İçe Aktar’ ile geri yükle. Mock'lar repoya/PR'a taşınabilir.",act:function(){var b=$("#snap-export");if(b)b.click()},pad:4},
-      {sel:"#snap-pdf",title:"PDF olarak indir",body:"Snapshot ve endpoint'lerini PDF rapor olarak indir.",act:function(){var b=$("#snap-pdf");if(b)b.click()},pad:4},
+      {sel:"#replay-rec",title:"Snapshot kaydet / içe aktar",body:"‘+ Yeni’ ile canlı trafiği bir snapshot'a alırsın; ‘Import JSON’ ile başkasının snapshot'ını yüklersin. Aktif snapshot eşleşen isteklere sunucuya gitmeden yanıt verir.",pad:4},
+      {sel:"#replay-list .litem",title:"Snapshot listesi",body:"Kaydedilen snapshot'lar burada listelenir — ad, tarih ve endpoint sayısı. ‘Activate’ ile etkinleştir, ‘Delete’ ile sil; tıklayınca sağda endpoint'leri açılır.",pad:4},
+      {sel:".snaphead",title:"Snapshot başlığı & aksiyonlar",body:"Seçili snapshot'ın endpoint sayısı ve oluşturma tarihi. ‘Mock Etkinleştir’ ile eşleşen istekleri snapshot'tan yanıtla, ‘JSON Dışa Aktar’ ile ekiple paylaş, ‘Delete’ ile sil.",pad:4},
+      {sel:".eptable",title:"Endpoint tablosu",body:"Snapshot'taki her endpoint: method, tam URL ve durum kodu (yeşil 2xx, kırmızı 5xx). Bir endpoint'i ‘Delete’ ile snapshot'tan çıkarabilirsin.",pad:4},
       {sel:"#snap-compare",title:"⇄ Karşılaştır (2 snapshot)",body:"‘Karşılaştır’ moduna gir, iki snapshot seç (örn. Android Login ↔ iOS Login). Açılan tam ekran karşılaştırma penceresinde dashboard'a kadarki servislerin farkları gösterilir.",act:function(){openMcmp()},pad:4},
       {sel:"#mcmp-ftabs",title:"Değişen / Sadece A / Sadece B / Aynı",body:"Servisler dört kategoriye ayrılır: farkı olanlar, yalnız bir platformda olanlar ve özdeş olanlar. Üstte toplam fark/eşleşme sayısı görünür.",pad:4},
       {sel:"#mcmp-detail",title:"Parametre bazlı fark",body:"Bir servise tıkla → request/response farkları parametre parametre: ~ değişti, + eklendi, − silindi. push provider (fcm→apns), feature flag, header farkları net görünür; PDF/Markdown olarak dışa aktarılır.",act:function(){mcmpSel="login";mcmpSec="all";renderMcmp()},pad:6}
