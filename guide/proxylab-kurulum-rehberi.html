@@ -39,6 +39,9 @@
   .shot{border:2px dashed #a9a6f5;background:#f6f5ff;border-radius:10px;padding:16px 18px;margin:12px 0;
     color:#5e5cc7;font-weight:600}
   .shot small{display:block;color:#8a88a8;font-weight:400;margin-top:3px}
+  .shot-img{margin:16px 0;border:1px solid #e6e3f7;border-radius:12px;overflow:hidden;box-shadow:0 6px 22px rgba(80,70,180,.12)}
+  .shot-img img{display:block;width:100%;height:auto}
+  .shot-img figcaption{font-size:12.5px;color:#7d7ba0;padding:9px 14px;background:#faf9ff;border-top:1px solid #efedfb}
   /* notlar — Confluence'ta blockquote/metne döner */
   .note{border-left:4px solid #06b6d4;background:#ecfdff;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0}
   .warn{border-left:4px solid #f59e0b;background:#fffbeb;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0}
@@ -91,7 +94,7 @@
     <li>Adım 0 — CA sertifikasını bu Mac'e kurma (tüm akışların ön koşulu)</li>
     <li>iOS Simulator bağlama</li>
     <li>iPhone — fiziksel cihaz (Wi-Fi)</li>
-    <li>Android — emülatör / USB (adb)</li>
+    <li>Android — emülatör (adb)</li>
     <li>Android — fiziksel cihaz (Wi-Fi)</li>
     <li>System Proxy &amp; Kapsam (Focus) — önemli uyarılar</li>
     <li>See — sağ tıklama menüsü (kural · breakpoint · Remote'a gönder)</li>
@@ -114,9 +117,7 @@
 </div>
 <p class="demo-note">↑ Bu, gerçek uygulamanın <strong>See</strong> ekranının çalışan bir taklididir. <strong>🎯 Rehberli Tur</strong> ile adım adım gezin, <strong>▶ Otomatik Tur</strong> ile kendiliğinden oynayan demoyu izleyin veya <strong>Serbest gez</strong> ile satırlara tıklayıp detayları kendiniz inceleyin.</p>
 
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: ProxyLab ana ekranı (See sekmesi, boş liste)
-  <small>Confluence/PDF gibi iframe çalışmayan ortamlar için: yukarıdaki interaktif önizlemenin yerine bu statik ekran görüntüsünü ekleyin. Üstte sekmeler + System Proxy + Connect; ortada “Point your device at this Mac's proxy” kartları; altta “Listening on 10.x.x.x : 8888”.</small>
-</div>
+<figure class="shot-img"><img src="images/01-ana-ekran.png" alt="ProxyLab ana ekranı — See sekmesi (henüz trafik yok)" loading="lazy"><figcaption>ProxyLab ana ekranı — See sekmesi (henüz trafik yok)</figcaption></figure>
 
 <h3>Bilmeniz gereken üç kavram</h3>
 <table>
@@ -126,9 +127,7 @@
   <tr><td><strong>Kapsam (Scope/Focus)</strong></td><td>Yalnız seçtiğiniz domainleri yakala, gerisini doğrudan geçir. Pinning yapan uygulamaların kırılmasını ve listenin gürültüyle dolmasını önler.</td></tr>
 </table>
 
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: Connect menüsü açık (sağ üst “Connect” düğmesine tıklanmış)
-  <small>Menüde şunlar görünür: System Proxy (anahtar), Install CA for iOS Simulator, iPhone (Real Device), Android (Real Device), Android (USB / adb), Export CA.</small>
-</div>
+<figure class="shot-img"><img src="images/02-connect-menu.png" alt="Sağ üstte Connect menüsü açık" loading="lazy"><figcaption>Sağ üstte Connect menüsü açık</figcaption></figure>
 
 <!-- ─────────────────────────────────────────────────────────── -->
 <h2><span class="num">2</span>Adım 0 — CA sertifikasını bu Mac'e kurma</h2>
@@ -159,10 +158,10 @@
   <li>Simülatörde bir uygulama açın; istekler ProxyLab listesine düşmeye başlar.</li>
 </ol>
 
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: Connect menüsünde “Install CA for iOS Simulator” seçiliyken</div>
+<figure class="shot-img"><img src="images/06-ios-ca-install.png" alt="Connect → “iOS Simulator için CA Yükle”" loading="lazy"><figcaption>Connect → “iOS Simulator için CA Yükle”</figcaption></figure>
 <div class="shot">📷 EKRAN GÖRÜNTÜSÜ: Kurulum sonrası onay (toast/bildirim: “CA installed on … simulator restarted”)</div>
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: System Proxy AÇIK (araç çubuğunda “System Proxy · ON · 127.0.0.1:8888”)</div>
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: Simülatör trafiği listede (See sekmesinde GET istekleri, 200)</div>
+<figure class="shot-img"><img src="images/03-system-proxy-on.png" alt="Araç çubuğunda System Proxy açık" loading="lazy"><figcaption>Araç çubuğunda System Proxy açık</figcaption></figure>
+<figure class="shot-img"><img src="images/04-see-trafik.png" alt="See sekmesinde yakalanan trafik" loading="lazy"><figcaption>See sekmesinde yakalanan trafik</figcaption></figure>
 
 <div class="warn"><b>Xcode 26 uyarısı</b> — Bazı Xcode 26 sürümlerinde <code>simctl add-root-cert</code> sessizce çalışmayabilir; CA simülatöre kurulmaz ve HTTPS handshake patlar (istek listede görünmez). Bu durumda CA'yı simülatörün TrustStore'una elle yazmak gerekir. Belirti: HTTPS isteklerinin hiç düşmemesi.</div>
 
@@ -175,7 +174,7 @@
   <li>Sağ üst <strong>Connect → “iPhone (Real Device)”</strong>. Açılan <strong>iOS Kurulum Rehberi</strong> penceresini izleyin:</li>
 </ol>
 
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: “iOS Setup Guide” penceresi (4 adım: Mac'e CA, Wi-Fi proxy, sertifikayı indir, yükle &amp; güven)</div>
+<figure class="shot-img"><img src="images/05-ios-setup-modal.png" alt="iOS Setup penceresi (Wi-Fi + CA adımları)" loading="lazy"><figcaption>iOS Setup penceresi (Wi-Fi + CA adımları)</figcaption></figure>
 
 <h3>Pencerede yer alan adımlar</h3>
 <ol>
@@ -212,43 +211,34 @@
 <div class="shot">📷 EKRAN GÖRÜNTÜSÜ (cihazdan): Safari'de CA indirme izni / “Profil İndirildi” bildirimi</div>
 <div class="shot">📷 EKRAN GÖRÜNTÜSÜ (cihazdan): Ayarlar → Profil yükleme ekranı (ProxyLab CA → Yükle)</div>
 <div class="shot">📷 EKRAN GÖRÜNTÜSÜ (cihazdan): Ayarlar → Hakkında → Sertifika Güveni Ayarları (ProxyLab CA açık)</div>
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: iPhone trafiği ProxyLab listesinde</div>
+<figure class="shot-img"><img src="images/04-see-trafik.png" alt="Cihaz trafiği See sekmesinde" loading="lazy"><figcaption>Cihaz trafiği See sekmesinde</figcaption></figure>
 
 <div class="note"><b>Not</b> — Fiziksel cihaz Wi-Fi proxy'sine yönlendirildiği için bu akışta <strong>System Proxy'yi açmanıza gerek yoktur</strong> (Bölüm 7).</div>
 
 <!-- ─────────────────────────────────────────────────────────── -->
-<h2><span class="num">5</span>Android — emülatör / USB (adb)</h2>
+<h2><span class="num">5</span>Android — emülatör (adb)</h2>
 
-<p>Otomatik akış: ProxyLab <code>adb</code> ile cihazı bulur, CA'yı yükler ve proxy'yi ayarlar. Aynı pencere hem Android <strong>emülatörü</strong> hem de <strong>USB ile bağlı fiziksel cihaz</strong> için çalışır — ikisi de <code>adb</code> üzerinden listelenir.</p>
+<p>Otomatik akış: ProxyLab <code>adb</code> ile çalışan <strong>emülatörü</strong> bulur, CA'yı yükler ve proxy'yi ayarlar — elle ayar gerekmez. Emülatör bu Mac'in üstünde çalıştığı için <strong>kablo/USB bağlantısına gerek yoktur</strong>; <code>adb</code> emülatörü otomatik görür.</p>
 
-<h3>5a — Android emülatör (USB <u>gerekmez</u>)</h3>
-<p>Emülatör zaten bu Mac'in üstünde çalıştığı için <strong>kablo/USB bağlantısına gerek yoktur</strong>; <code>adb</code> emülatörü otomatik görür.</p>
 <ol>
   <li>Android Studio'da bir <strong>emülatör (AVD) başlatın</strong> — açık ve önyüklenmiş olsun.</li>
-  <li>Sağ üst <strong>Connect → “Android (USB / adb)”</strong> (emülatör de bu listede çıkar). Açılan <strong>Android Setup</strong> penceresinde çalışan emülatör görünür.</li>
+  <li>Sağ üst <strong>Connect → “Android (Emulator / adb)”</strong>. Açılan <strong>Android Setup</strong> penceresinde çalışan emülatör görünür.</li>
   <li>Emülatörü seçip <strong>CA yükle</strong> + <strong>proxy ayarla</strong> aksiyonlarını çalıştırın — <code>adb</code> her ikisini otomatik yapar.</li>
 </ol>
-<div class="tip"><b>İpucu</b> — Emülatör görünmüyorsa: emülatörün tam önyüklenmesini bekleyin ve pencerede <strong>Yenile (Refresh)</strong>'e basın. USB takmaya çalışmayın; emülatör için gereksizdir.</div>
+<div class="tip"><b>İpucu</b> — Emülatör görünmüyorsa: emülatörün tam önyüklenmesini bekleyin ve pencerede <strong>Yenile (Refresh)</strong>'e basın.</div>
 
-<h3>5b — Fiziksel cihaz (USB kablo ile)</h3>
-<ol>
-  <li>Cihazda <strong>Geliştirici Seçenekleri → USB Hata Ayıklama</strong>'yı açın.</li>
-  <li>Cihazı <strong>USB kablo</strong> ile Mac'e bağlayın; telefonda çıkan <strong>“USB hata ayıklamaya izin ver?”</strong> sorusuna <strong>İzin Ver</strong> deyin.</li>
-  <li>Sağ üst <strong>Connect → “Android (USB / adb)”</strong> → pencerede cihazı seçin → <strong>CA yükle</strong> + <strong>proxy ayarla</strong>.</li>
-</ol>
+<figure class="shot-img"><img src="images/02-connect-menu.png" alt="Connect → “Android (Emulator / adb)”" loading="lazy"><figcaption>Connect → “Android (Emulator / adb)”</figcaption></figure>
+<figure class="shot-img"><img src="images/07-android-setup-modal.png" alt="Android Setup penceresi — çalışan emülatör" loading="lazy"><figcaption>Android Setup penceresi — çalışan emülatör</figcaption></figure>
+<figure class="shot-img"><img src="images/04-see-trafik.png" alt="Emülatör trafiği See sekmesinde" loading="lazy"><figcaption>Emülatör trafiği See sekmesinde</figcaption></figure>
 
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: Connect menüsünde “Android (USB / adb)” seçiliyken</div>
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: “Android Setup” penceresi — bağlı cihaz/emülatör listesi + “CA yükle” / “proxy ayarla” butonları</div>
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: Cihaz/emülatör bağlandıktan sonra Android trafiği listede</div>
-
-<div class="warn"><b>Android 7+ uyarısı</b> — Kullanıcı CA'sı yalnız buna izin veren uygulamalarda geçerlidir. Tüm uygulamalar için sistem deposuna kurulum gerekir (root + <code>adb</code>). Emülatörlerin çoğu (Google Play'siz “AOSP” imajları) root'a izin verdiği için sistem deposuna kurulum genelde emülatörde sorunsuzdur.</div>
+<div class="warn"><b>Android 7+ uyarısı</b> — Kullanıcı CA'sı yalnız buna izin veren uygulamalarda geçerlidir. Emülatörlerin çoğu (Google Play'siz “AOSP” imajları) root'a izin verdiği için sistem deposuna kurulum genelde emülatörde sorunsuzdur; böylece tüm uygulamalar CA'ya güvenir. <em>Fiziksel Android cihaz için Bölüm 6'daki Wi-Fi akışını kullanın.</em></div>
 
 <!-- ─────────────────────────────────────────────────────────── -->
 <h2><span class="num">6</span>Android — fiziksel cihaz (Wi-Fi)</h2>
 
 <p>adb olmadan, aynı Wi-Fi üzerinden. Connect → <strong>“Android (Real Device)”</strong> 4 adımlı rehberi açar (iPhone akışına benzer).</p>
 
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: “Android Setup Guide” penceresi (4 adım)</div>
+<figure class="shot-img"><img src="images/08-android-wifi-modal.png" alt="Android Setup Guide penceresi (Wi-Fi)" loading="lazy"><figcaption>Android Setup Guide penceresi (Wi-Fi)</figcaption></figure>
 
 <ol>
   <li><strong>Adım 1:</strong> CA'yı bu Mac'e yükle (Bölüm 2).</li>
@@ -281,8 +271,8 @@
   <li><strong>Focus</strong> moduna geçip yalnız kendi domain(ler)inizi ekleyin (örn. <code>api.example.com</code>).</li>
 </ol>
 
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: Change → Kapsam (Scope) sekmesi, Focus modu + domain listesi</div>
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: Araç çubuğunda System Proxy ON · 127.0.0.1:8888</div>
+<figure class="shot-img"><img src="images/09-scope-focus.png" alt="SSL Proxying List — Kapsam (Focus) ve domain listesi" loading="lazy"><figcaption>SSL Proxying List — Kapsam (Focus) ve domain listesi</figcaption></figure>
+<figure class="shot-img"><img src="images/03-system-proxy-on.png" alt="Araç çubuğunda System Proxy açık" loading="lazy"><figcaption>Araç çubuğunda System Proxy açık</figcaption></figure>
 
 <!-- ─────────────────────────────────────────────────────────── -->
 <h2><span class="num">8</span>See — sağ tıklama menüsü (kural · breakpoint · Remote'a gönder)</h2>
@@ -339,9 +329,9 @@
 
 <div class="tip"><b>Özet</b> — <strong>Kural kaydetme</strong> ve <strong>breakpoint kaydetme</strong> sadece Change/Breakpoints sekmelerinden değil, <strong>See'de sağ tıklayarak da</strong> yapılır — ve bu yol daha hızlıdır çünkü istek verisi hazır gelir.</div>
 
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: See'de bir isteğe sağ tıklanmış, bağlam menüsü açık (yukarıdaki menünün gerçek hali)</div>
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: “Bundan Kural Oluştur” sonrası açılan, alanları dolu kural editörü</div>
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: “Breakpoint Ekle” sonrası istek uçuşta durdurulmuş (düzenleme ekranı)</div>
+<figure class="shot-img"><img src="images/10-sagtik-menu.png" alt="See’de bir isteğe sağ tık — bağlam menüsü" loading="lazy"><figcaption>See’de bir isteğe sağ tık — bağlam menüsü</figcaption></figure>
+<figure class="shot-img"><img src="images/11-kural-editor.png" alt="“Bundan Kural Oluştur” sonrası dolu kural editörü" loading="lazy"><figcaption>“Bundan Kural Oluştur” sonrası dolu kural editörü</figcaption></figure>
+<figure class="shot-img"><img src="images/12-breakpoint.png" alt="Breakpoint — duraklatılmış istek ve düzenleme" loading="lazy"><figcaption>Breakpoint — duraklatılmış istek ve düzenleme</figcaption></figure>
 
 <!-- ─────────────────────────────────────────────────────────── -->
 <h2><span class="num">9</span>Remote — İstek oluşturucu (request builder)</h2>
@@ -368,9 +358,9 @@
   <tr><td><strong>Çalıştır (Run)</strong></td><td><code>⌘/Ctrl+Enter</code> ile gönderir, yanıtı gösterir. <code>Esc</code> ile kapatır.</td></tr>
 </table>
 
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: Remote sekmesi — method/URL/header/body editörü + Run butonu</div>
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: See → sağ tık → “Remote Map'e Ekle” ile alanların dolu geldiği Remote ekranı</div>
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: Run sonrası dönen yanıt (status + body)</div>
+<figure class="shot-img"><img src="images/13-remote.png" alt="Remote — istek oluşturucu (method/URL/header/body)" loading="lazy"><figcaption>Remote — istek oluşturucu (method/URL/header/body)</figcaption></figure>
+<figure class="shot-img"><img src="images/13-remote.png" alt="See → Remote’a gönderilen, alanları dolu istek" loading="lazy"><figcaption>See → Remote’a gönderilen, alanları dolu istek</figcaption></figure>
+<figure class="shot-img"><img src="images/13-remote.png" alt="Remote — Run sonrası dönen yanıt" loading="lazy"><figcaption>Remote — Run sonrası dönen yanıt</figcaption></figure>
 
 <!-- ─────────────────────────────────────────────────────────── -->
 <h2><span class="num">10</span>Sorun giderme</h2>

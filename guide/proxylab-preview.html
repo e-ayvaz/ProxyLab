@@ -12,7 +12,7 @@
   Sol panelden bir AKIŞ seçin:
     • Arayüz Turları : See, Kurallar, Breakpoint'ler, SSL Proxying List,
                        Replay, Format, Settings
-    • Cihaz Kurulumu: iOS Simulator, iPhone (Wi-Fi), Android (USB), Android (Wi-Fi)
+    • Cihaz Kurulumu: iOS Simulator, iPhone (Wi-Fi), Android (Emülatör), Android (Wi-Fi)
   Her akış kendi ekranını gösterir + hotspot/tooltip ile adım adım anlatır.
   Ayrıca "Otomatik Tur" (video/GIF muadili) ve "Serbest gez" modları vardır.
   Tek dosya, bağımsız çalışır. Ana rehbere iframe ile gömülür.
@@ -755,7 +755,7 @@
                 </div>
                 <div class="card connect"><h4>Connect</h4>
                   <div class="ln"><b>iOS Simulator</b><span>Simulator açıkken Connect → tek tıkla CA kur.</span></div>
-                  <div class="ln"><b>Android</b><span>Emulator/USB seçilir, CA + proxy otomatik.</span></div>
+                  <div class="ln"><b>Android</b><span>Emülatör seçilir, CA + proxy otomatik.</span></div>
                   <div class="ln"><b>Gerçek Cihaz</b><span>QR'ı tara, profili yükle, güven.</span></div>
                 </div>
                 <div class="card change"><h4>Change</h4>
@@ -1007,7 +1007,7 @@ content-type: application/json</textarea></div>
           <div class="conitem" data-dev="iossim"><span class="ci">📱</span><div class="cc"><b>iOS Simulator için CA Yükle</b><span>Açık olan simulator'a sertifika yükle</span></div></div>
           <div class="conitem" data-dev="iphone"><span class="ci">🍎</span><div class="cc"><b>iPhone (Gerçek Cihaz)</b><span>Wi-Fi proxy + CA kurulum rehberi</span></div></div>
           <div class="conitem" data-dev="androidwifi"><span class="ci">🤖</span><div class="cc"><b>Android (Gerçek Cihaz)</b><span>Wi-Fi proxy + CA rehberi (adb gerekmez)</span></div></div>
-          <div class="conitem" data-dev="androidusb"><span class="ci">🔌</span><div class="cc"><b>Android (USB / adb)</b><span>Cihaz seç, CA otomatik yükle, proxy ayarla</span></div></div>
+          <div class="conitem" data-dev="androidusb"><span class="ci">🤖</span><div class="cc"><b>Android (Emulator / adb)</b><span>Çalışan emülatörü seç, CA + proxy otomatik</span></div></div>
           <div class="conitem"><span class="ci">⬇</span><div class="cc"><b>CA'yı Dışa Aktar…</b><span>Kök sertifikayı diske kaydet</span></div></div>
         </div>
 
@@ -1481,11 +1481,10 @@ content-type: application/json</textarea></div>
       '<div class="devcard" id="ds-target"><div class="di"><b>iPhone 15 Pro</b><div class="id">iOS 18.2 · 1F2E3D4C…</div></div><div class="btn accent sm" id="ds-install">CA yükle & yeniden başlat</div></div>'+
       '<div class="devcard"><div class="di"><b>iPad Air</b><div class="id">iOS 17.5 · 2G3H4I5J…</div></div><span class="ca-ok">✓ kurulu</span></div>',
       '<div class="btn sm">↻ Yenile</div><div class="btn sm" id="modal-close">Kapat</div>')},
-    androidusb:function(){return modalShell("Android Setup (Emülatör / USB · adb)","adb ile bulunan cihazlar. Bir aksiyon seç:",
-      '<div class="banner info">ProxyLab cihazları <b>adb</b> ile bulur. <b>Emülatör</b> için USB kablo gerekmez — Android Studio\'da açıkken otomatik listelenir. <b>Fiziksel cihaz</b> için: USB Hata Ayıklama\'yı aç, USB ile bağla.</div>'+
-      '<div class="devcard" id="ds-target"><div class="di"><b><span class="badge-em em">EMÜLATÖR</span>Pixel 6 API 34</b><div class="id">emulator-5554 · USB gerekmez</div></div></div>'+
+    androidusb:function(){return modalShell("Android Setup (Emülatör · adb)","adb ile bulunan çalışan emülatör. Bir aksiyon seç:",
+      '<div class="banner info">ProxyLab emülatörü <b>adb</b> ile otomatik bulur — Android Studio\'da açıkken listede çıkar; kablo/USB gerekmez.</div>'+
+      '<div class="devcard" id="ds-target"><div class="di"><b><span class="badge-em em">EMÜLATÖR</span>Pixel 6 API 34</b><div class="id">emulator-5554 · kablo gerekmez</div></div></div>'+
       '<div style="display:flex;gap:8px;margin:-2px 0 14px"><div class="btn sm" id="ds-install" style="background:var(--orange-bg);color:var(--orange-bright);border-color:var(--orange-bg)">⚠ CA Yükle</div><div class="btn accent sm" id="ds-proxy">Proxy\'yi Aç</div><div class="btn sm" style="color:var(--red-bright)">Proxy\'yi Kapat</div></div>'+
-      '<div class="devcard"><div class="di"><b><span class="badge-em dv">FİZİKSEL · USB</span>Galaxy S23</b><div class="id">2ABCDEF1234… · USB Hata Ayıklama açık</div></div></div>'+
       '<div class="banner warn" style="margin-top:6px">Android 7+: kullanıcı CA\'sı yalnız buna izin veren uygulamalarda geçerli. Tüm uygulamalar için emülatörde sistem deposuna kurulur (otomatik).</div>',
       '<div class="btn sm">↻ Yenile</div><div class="btn sm" id="modal-close">Kapat</div>')},
     iphone:function(){return wifiModal("ios")},
@@ -1619,9 +1618,9 @@ content-type: application/json</textarea></div>
       {sel:"#ws4",title:"Adım 4 · PAC proxy (EN SON)",body:"Wi-Fi → Proxy Yapılandır → Otomatik, PAC URL'ini gir. Sertifikadan önce açarsan HTTPS kırılır. Kapsam dışı uygulamalar doğrudan geçer. (Aşağıda iOS proxy ekranının taklidi var.)",pad:4},
       {sel:"#ws5",title:"Adım 5 · Manuel (PAC olmazsa)",body:"Nadiren Otomatik desteklenmez. O zaman Manuel proxy: Sunucu = bu Mac'in IP'si, Port 8888. Dikkat: manuel modda TÜM trafik proxy'den geçer, Kapsam (Focus) çalışmaz.",pad:4}
     ]},
-    "dev:androidusb":{label:"Android (Emülatör/USB)",setup:function(){showView("see");openDeviceModal("androidusb")},wait:260,steps:[
-      {sel:"#connect",title:"Connect → Android (adb)",body:"Bu akış adb üzerinden çalışır. EMÜLATÖR için USB kablo gerekmez — Android Studio'da açıkken otomatik bulunur. FİZİKSEL cihaz için USB Hata Ayıklama'yı açıp USB ile bağla. Sonra Connect → ‘Android (USB / adb)’.",pad:4},
-      {sel:"#ds-target",title:"Cihaz listesi",body:"adb ile bulunan hedefler listelenir: EMÜLATÖR (USB gerekmez) ve FİZİKSEL · USB rozetiyle. adb yoksa veya cihaz görünmezse Wi-Fi akışını (soldaki ‘Android (Wi-Fi)’) kullanabilirsin.",pad:4},
+    "dev:androidusb":{label:"Android (Emülatör)",setup:function(){showView("see");openDeviceModal("androidusb")},wait:260,steps:[
+      {sel:"#connect",title:"Connect → Android (adb)",body:"Bu akış adb üzerinden çalışır ve çalışan emülatörü otomatik bulur — Android Studio'da açıkken listede çıkar, kablo/USB gerekmez. Sonra Connect → ‘Android (Emulator / adb)’.",pad:4},
+      {sel:"#ds-target",title:"Emülatör listesi",body:"adb ile bulunan çalışan emülatör listelenir. Görünmüyorsa emülatörün önyüklenmesini bekleyin ve ‘Yenile’ye basın. Fiziksel cihaz için soldaki ‘Android (Wi-Fi)’ akışını kullanın.",pad:4},
       {sel:"#ds-install",title:"CA yükle",body:"‘CA Yükle’ adb ile sertifikayı cihaza otomatik kurar. Emülatörde sistem deposuna yazılır (tüm uygulamalar güvenir).",act:function(){var i=$("#ds-install");if(i)i.click()},pad:4},
       {sel:"#ds-proxy",title:"Proxy'yi aç",body:"‘Proxy'yi Aç’ cihazın proxy ayarını adb ile ProxyLab'e yönlendirir — elle ayar gerekmez. Trafik akmaya başlar.",act:function(){var p=$("#ds-proxy");if(p)p.click()},pad:4}
     ]},
@@ -1644,7 +1643,7 @@ content-type: application/json</textarea></div>
   ];
   var DEV_FLOWS=[
     ["dev:iossim","📱","iOS Simulator","Tek tık CA"],["dev:iphone","🍎","iPhone (Wi-Fi)","5 adım + PAC"],
-    ["dev:androidusb","🔌","Android (Emülatör/USB)","adb ile otomatik"],["dev:androidwifi","🤖","Android (Wi-Fi)","5 adım + PAC"]
+    ["dev:androidusb","🔌","Android (Emülatör)","adb ile otomatik"],["dev:androidwifi","🤖","Android (Wi-Fi)","5 adım + PAC"]
   ];
   function fbItem(f){return '<div class="fb-item" data-flow="'+f[0]+'"><span class="ic">'+f[1]+'</span><span class="tx"><b>'+f[2]+'</b><span>'+f[3]+'</span></span></div>'}
   $("#ui-flows").innerHTML=UI_FLOWS.map(fbItem).join("");
