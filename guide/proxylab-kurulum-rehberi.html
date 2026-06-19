@@ -19,7 +19,7 @@
 -->
 <style>
   body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    color:#1c1c20;line-height:1.65;max-width:900px;margin:0 auto;padding:32px 28px 80px;font-size:15px;background:#fff}
+    color:#1c1c20;line-height:1.65;max-width:1180px;margin:0 auto;padding:38px 40px 80px;font-size:15px;background:#fff}
   h1{font-size:30px;letter-spacing:-.02em;margin:0 0 4px}
   h1 .sub{display:block;font-size:15px;font-weight:400;color:#71717a;letter-spacing:0;margin-top:6px}
   h2{font-size:22px;margin:38px 0 10px;padding-top:14px;border-top:2px solid #ece9ff;color:#1c1c20}
@@ -52,14 +52,15 @@
   .lead{font-size:16px;color:#52525b}
   hr{border:0;border-top:1px solid #ece9ff;margin:28px 0}
   /* interaktif önizleme gömme kutusu (web'de iframe; Confluence'ta link'e döner) */
-  .live-demo{border:1px solid #ece9ff;border-radius:12px;overflow:hidden;margin:16px 0;
-    box-shadow:0 10px 30px -16px rgba(28,28,32,.35);background:#0d0d10}
+  .live-demo{border:1px solid #ece9ff;border-radius:12px;overflow:hidden;margin:24px 0;
+    box-shadow:0 10px 30px -16px rgba(28,28,32,.35);background:#0d0d10;
+    width:min(1480px,95vw);position:relative;left:50%;transform:translateX(-50%)}
   .live-demo .bar{display:flex;align-items:center;gap:8px;padding:9px 14px;background:#15151a;
     border-bottom:1px solid rgba(255,255,255,.07);color:#a1a1aa;font-size:12.5px;font-weight:600}
   .live-demo .bar .tag{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
     color:#0d0d10;background:#b9b8fb;border-radius:4px;padding:2px 7px}
   .live-demo .bar a{margin-left:auto;color:#b9b8fb;font-weight:600;font-size:12px;text-decoration:none}
-  .live-demo iframe{display:block;width:100%;height:760px;border:0;background:#0d0d10}
+  .live-demo iframe{display:block;width:100%;height:min(920px,84vh);border:0;background:#0d0d10}
   .demo-note{font-size:13px;color:#71717a;margin:6px 2px 0}
   /* sağ tık menüsü taklidi — uygulamadaki context menu'nün birebir görünümü.
      Confluence'a yapışınca süslü kutu düşer, menü öğeleri sade liste/metne döner. */
@@ -140,8 +141,8 @@
   <li>Ana ekranın altında <strong>“✓ CA installed on this Mac”</strong> yeşil yazısını görün.</li>
 </ol>
 
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: macOS parola diyalogu (“… trust settings” için parola istiyor)</div>
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: Ana ekran altında yeşil “✓ CA installed on this Mac · next: install on your device”</div>
+<figure class="shot-img"><img src="images/14-macos-guven.png" alt="macOS Anahtar Zinciri — ProxyLab Root CA için “Her Zaman Güven”" loading="lazy"><figcaption>macOS Anahtar Zinciri — ProxyLab Root CA için “Her Zaman Güven”</figcaption></figure>
+<figure class="shot-img"><img src="images/15-ca-installed.png" alt="ProxyLab: “CA installed on this Mac” — sertifika bu Mac'e kuruldu" loading="lazy"><figcaption>ProxyLab: “CA installed on this Mac” — sertifika bu Mac'e kuruldu</figcaption></figure>
 
 <div class="note"><b>Not</b> — Bu adım Mac'in (ve Mac üstündeki Safari/simülatör'ün) güvenini sağlar. Fiziksel cihazlar için sertifika ayrıca cihaza da kurulur (aşağıdaki bölümler).</div>
 
@@ -159,7 +160,6 @@
 </ol>
 
 <figure class="shot-img"><img src="images/06-ios-ca-install.png" alt="Connect → “iOS Simulator için CA Yükle”" loading="lazy"><figcaption>Connect → “iOS Simulator için CA Yükle”</figcaption></figure>
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ: Kurulum sonrası onay (toast/bildirim: “CA installed on … simulator restarted”)</div>
 <figure class="shot-img"><img src="images/03-system-proxy-on.png" alt="Araç çubuğunda System Proxy açık" loading="lazy"><figcaption>Araç çubuğunda System Proxy açık</figcaption></figure>
 <figure class="shot-img"><img src="images/04-see-trafik.png" alt="See sekmesinde yakalanan trafik" loading="lazy"><figcaption>See sekmesinde yakalanan trafik</figcaption></figure>
 
@@ -207,10 +207,10 @@
   </li>
 </ol>
 
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ (cihazdan): iPhone Ayarlar → Wi-Fi → Proxy Yapılandır → Otomatik (PAC URL girilmiş)</div>
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ (cihazdan): Safari'de CA indirme izni / “Profil İndirildi” bildirimi</div>
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ (cihazdan): Ayarlar → Profil yükleme ekranı (ProxyLab CA → Yükle)</div>
-<div class="shot">📷 EKRAN GÖRÜNTÜSÜ (cihazdan): Ayarlar → Hakkında → Sertifika Güveni Ayarları (ProxyLab CA açık)</div>
+<figure class="shot-img"><img src="images/16-ios-wifi-proxy.png" alt="iPhone: Wi-Fi → Proxy Yapılandır → Otomatik (PAC URL)" loading="lazy"><figcaption>iPhone: Wi-Fi → Proxy Yapılandır → Otomatik (PAC URL)</figcaption></figure>
+<figure class="shot-img"><img src="images/17-ios-profil-indi.png" alt="iPhone: Ayarlar üstünde “Profil İndirildi” satırı" loading="lazy"><figcaption>iPhone: Ayarlar üstünde “Profil İndirildi” satırı</figcaption></figure>
+<figure class="shot-img"><img src="images/18-ios-profil-yukle.png" alt="iPhone: Profili Yükle — ProxyLab Root CA" loading="lazy"><figcaption>iPhone: Profili Yükle — ProxyLab Root CA</figcaption></figure>
+<figure class="shot-img"><img src="images/19-ios-guven.png" alt="iPhone: Sertifika Güven Ayarları — ProxyLab Root CA açık" loading="lazy"><figcaption>iPhone: Sertifika Güven Ayarları — ProxyLab Root CA açık</figcaption></figure>
 <figure class="shot-img"><img src="images/04-see-trafik.png" alt="Cihaz trafiği See sekmesinde" loading="lazy"><figcaption>Cihaz trafiği See sekmesinde</figcaption></figure>
 
 <div class="note"><b>Not</b> — Fiziksel cihaz Wi-Fi proxy'sine yönlendirildiği için bu akışta <strong>System Proxy'yi açmanıza gerek yoktur</strong> (Bölüm 7).</div>
